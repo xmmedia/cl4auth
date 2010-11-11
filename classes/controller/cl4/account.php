@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Account extends Controller_Base {
+class Controller_cl4_Account extends Controller_Base {
 	/**
 	* @see Controller_Base
 	*/

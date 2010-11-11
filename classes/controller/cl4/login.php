@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Controller_Login extends Controller_Base {
+class Controller_cl4_Login extends Controller_Base {
 	/**
 	* View: Login form.
 	*/
