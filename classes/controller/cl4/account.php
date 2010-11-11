@@ -191,7 +191,7 @@ class Controller_cl4_Account extends Controller_Base {
 	* A basic implementation of the "Forgot password" functionality
 	*/
 	public function action_forgot() {
-		$default_options = Kohana::config('account');
+		$default_options = Kohana::config('cl4account');
 
 		// set the template page_title (see Controller_Base for implementation)
 		$this->template->page_title = 'Forgot Password';
@@ -247,7 +247,7 @@ class Controller_cl4_Account extends Controller_Base {
 	* @todo consider changing this to not send the password, but instead allow them enter a new password right there; this might be more secure, but since we've sent them a link anyway, it's probably too late for security; the only thing is email is insecure (not HTTPS)
 	*/
 	function action_reset() {
-		$default_options = Kohana::config('account');
+		$default_options = Kohana::config('cl4account');
 
 		// set the template title (see Controller_Base for implementation)
 		$this->template->page_title = 'Password Reset';

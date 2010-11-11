@@ -178,7 +178,7 @@ class Model_cl4_User extends Model_Auth_User {
 		// Get the remember login option
 		$remember = ! empty($array['remember']);
 
-		$auth_types = Kohana::config('claerologin.auth_type');
+		$auth_types = Kohana::config('cl4login.auth_type');
 
 		// Login starts out invalid
 		$status = FALSE;
@@ -251,7 +251,7 @@ class Model_cl4_User extends Model_Auth_User {
 	} // function login
 
 	public function logout() {
-		$auth_types = Kohana::config('claerologin.auth_type');
+		$auth_types = Kohana::config('cl4login.auth_type');
 
 		$this->add('auth_log', ORM::factory('authlog'), array(
 			'username' => $this->username,
