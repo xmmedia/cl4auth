@@ -1,10 +1,5 @@
 <?php defined('SYSPATH') or die ('No direct script access.');
 
-/**
-* This model was created using Claero_ORM and should provide
-* standard Kohana ORM features in additon to cl4 specific features.
-*/
-
 class Model_cl4_User extends Model_Auth_User {
 	protected $_table_names_plural = FALSE;
 	protected $_table_name = 'user';

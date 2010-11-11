@@ -59,7 +59,7 @@ class Controller_cl4_Account extends Controller_Base {
 		} // if
 
 		// prepare the view & form
-		$this->template->body_html = View::factory('claero/claeroaccount/profile')
+		$this->template->body_html = View::factory('cl4/cl4account/profile')
 			->set('edit_fields', $model->get_form(array(
 				'form_action' => '/account/profile',
 				'form_id' => 'editprofile',
@@ -109,7 +109,7 @@ class Controller_cl4_Account extends Controller_Base {
 			}
 		}
 
-		$this->template->body_html = View::factory('claero/claeroaccount/password');
+		$this->template->body_html = View::factory('cl4/cl4account/password');
 	} // function
 
 	/**
@@ -201,7 +201,7 @@ class Controller_cl4_Account extends Controller_Base {
 			// admin passwords cannot be reset by email
 			if (is_numeric($user->id) && ! in_array($user->username, $default_options['admin_accounts'])) {
 				// send an email with the account reset token
-				$user->reset_token = Claero_Auth::generate_password(32);
+				$user->reset_token = cl4_Auth::generate_password(32);
 				$user->save();
 
 				try {
@@ -216,7 +216,7 @@ class Controller_cl4_Account extends Controller_Base {
 					), '', '&');
 					$link = HTML::anchor($url, 'click here', array('target' => '_blank'));
 
-					$mail->Body = View::factory('claero/claeroaccount/forgot_link')
+					$mail->Body = View::factory('cl4/cl4account/forgot_link')
 						->set('app_name', LONG_NAME)
 						->set('url', $url)
 						->set('link', $link)
@@ -238,7 +238,7 @@ class Controller_cl4_Account extends Controller_Base {
 			}
 		}
 
-		$this->template->body_html = View::factory('claero/claeroaccount/forgot');
+		$this->template->body_html = View::factory('cl4/cl4account/forgot');
 	} // function
 
 	/**
@@ -252,9 +252,9 @@ class Controller_cl4_Account extends Controller_Base {
 		// set the template title (see Controller_Base for implementation)
 		$this->template->page_title = 'Password Reset';
 
-		$username = Claero::get_param('username');
+		$username = cl4::get_param('username');
 		if ($username !== null) $username = trim($username);
-		$reset_token = Claero::get_param('reset_token');
+		$reset_token = cl4::get_param('reset_token');
 
 		// make sure that the reset_token has exactly 32 characters (not doing that would allow resets with token length 0)
 		// also make sure we aren't trying to reset the password for an admin
@@ -264,7 +264,7 @@ class Controller_cl4_Account extends Controller_Base {
 			// admin passwords cannot be reset by email
 			if (is_numeric($user->id) && ! in_array($user->username, $default_options['admin_accounts'])) {
 				try {
-					$password = Claero_Auth::generate_password();
+					$password = cl4_Auth::generate_password();
 					$user->password = $password;
 					$user->failed_login_count = 0; // reset the login count
 					$user->save();
@@ -281,7 +281,7 @@ class Controller_cl4_Account extends Controller_Base {
 
 					$link = URL_ROOT . '/login';
 
-					$mail->Body = View::factory('claero/claeroaccount/forgot_link')
+					$mail->Body = View::factory('cl4/cl4account/forgot_link')
 						->set('app_name', LONG_NAME)
 						->set('username', $user->username)
 						->set('password', $password)

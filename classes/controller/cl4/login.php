@@ -14,10 +14,10 @@ class Controller_cl4_Login extends Controller_Base {
 			Request::instance()->redirect('account/profile');
 		}
 
-		$timed_out = Claero::get_param('timed_out');
-		$redirect = Claero::get_param('redirect', '');
+		$timed_out = cl4::get_param('timed_out');
+		$redirect = cl4::get_param('redirect', '');
 
-		$login_view = View::factory('claero/claerologin/login')
+		$login_view = View::factory('cl4/cl4login/login')
 			->set('redirect', $redirect);
 
 		// put the post in another var so we don't change it to a validate object in login()
@@ -97,7 +97,7 @@ EOA;
 	* If the user has fully timed out, they will be logged out and returned to the login page
 	*/
 	public function action_timedout() {
-		$redirect = Claero::get_param('redirect', '');
+		$redirect = cl4::get_param('redirect', '');
 
 		$user = Auth::instance()->get_user();
 
@@ -110,7 +110,7 @@ EOA;
 
 		$this->template->page_title = 'Timed Out';
 
-		$timedout_view = View::factory('claero/claerologin/timed_out')
+		$timedout_view = View::factory('cl4/cl4login/timed_out')
 			->set('redirect', $redirect)
 			->set('username', $user->username);
 
@@ -127,8 +127,8 @@ EOA;
 	public function action_noaccess() {
 		// set the template title (see Controller_App for implementation)
 		$this->template->title = 'Access not allowed';
-		$view = $this->template->body_html = View::factory('claero/claerologin/no_access')
-			->set('referrer', Claero::get_param('referrer'));
+		$view = $this->template->body_html = View::factory('cl4/cl4login/no_access')
+			->set('referrer', cl4::get_param('referrer'));
 	} // function
 
 	/**
@@ -139,7 +139,7 @@ EOA;
 	* @return	string
 	*/
 	private function get_redirect_query() {
-		$redirect = Claero::get_param('redirect');
+		$redirect = cl4::get_param('redirect');
 
 		if ( ! empty($redirect)) return URL::array_to_query(array('redirect' => $redirect), '&');
 		else return '';
