@@ -5,8 +5,7 @@
  * standard Kohana ORM features in additon to cl4 specific features.
  */
 
-class Model_Claero_UserProfile extends Model_User {
-
+class Model_cl4_UserProfile extends Model_User {
 	protected $_override_properties = array(
 		'_table_columns' => array(
 			'id' => array(
@@ -35,5 +34,4 @@ class Model_Claero_UserProfile extends Model_User {
 			),
 		),
 	);
-
 } // class

@@ -5,7 +5,7 @@
 * standard Kohana ORM features in additon to cl4 specific features.
 */
 
-class Model_Claero_User extends Model_Auth_User {
+class Model_cl4_User extends Model_Auth_User {
 	protected $_table_names_plural = FALSE;
 	protected $_table_name = 'user';
 	public $_table_name_display = 'User';
@@ -363,5 +363,4 @@ class Model_Claero_User extends Model_Auth_User {
 
 		return $validation;
 	} // function
-
 } // class

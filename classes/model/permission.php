@@ -2,4 +2,4 @@
 /**
  * Default permission
  */
-class Model_Permission extends Model_Claero_Permission {}
+class Model_Permission extends Model_cl4_Permission {}

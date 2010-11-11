@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
-class Model_Claero_AuthLog extends ORM {
+class Model_cl4_AuthLog extends ORM {
 	protected $_table_names_plural = FALSE;
 	protected $_table_name = 'auth_log';
 	public $_table_name_display = 'Auth Log';

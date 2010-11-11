@@ -2,7 +2,7 @@
 /**
  * Default permission
  */
-class Model_Claero_AuthType extends ORM {
+class Model_cl4_AuthType extends ORM {
 	protected $_table_names_plural = FALSE;
 	protected $_table_name = 'auth_type';
 	public $_table_name_display = 'Auth Type';

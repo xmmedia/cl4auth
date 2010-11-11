@@ -5,4 +5,4 @@
  * standard Kohana ORM features in additon to cl4 specific features.
  */
 
-class Model_UserProfile extends Model_Claero_UserProfile {}
+class Model_UserProfile extends Model_cl4_UserProfile {}

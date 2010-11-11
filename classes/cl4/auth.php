@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
-class Claero_Auth extends Kohana_Auth_ORM {
+class cl4_Auth extends Kohana_Auth_ORM {
 	/**
 	* An array of permissions that have already been checked
 	* permission => bool (has, doesn't have)

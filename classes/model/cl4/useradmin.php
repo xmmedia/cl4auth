@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die ('No direct script access.');
 
-class Model_Claero_UserAdmin extends Model_User {
+class Model_cl4_UserAdmin extends Model_User {
 	protected $_override_properties = array(
 		'_rules' => array(
 			'password' => array(
