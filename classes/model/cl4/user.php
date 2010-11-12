@@ -155,6 +155,12 @@ class Model_cl4_User extends Model_Auth_User {
 	// Columns to ignore
 	protected $_ignored_columns = array('password_confirm');
 
+	protected $_expires_column = array(
+		'column' 	=> 'expiry_date',
+		'format' 	=> 'Y-m-j H:i:s',
+		'default'	=> 0,
+	);
+
 	/**
 	* Validates login information from an array, and optionally redirects
 	* after a successful login.
