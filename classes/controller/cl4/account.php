@@ -1,6 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 class Controller_cl4_Account extends Controller_Base {
+	public $page = 'account';
+
 	/**
 	* @see Controller_Base
 	*/
