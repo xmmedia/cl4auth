@@ -47,7 +47,7 @@ class Model_cl4_User extends Model_Auth_User {
 		'password_confirm' => 'Password Confirm',
 		'first_name' => 'First Name',
 		'last_name' => 'Last Name',
-		'inactive_flag' => 'Inactive',
+		'active_flag' => 'Active',
 		'login_count' => 'Login Count',
 		'last_login' => 'Last Login',
 		'failed_login_count' => 'Failed Login Count',
@@ -97,13 +97,16 @@ class Model_cl4_User extends Model_Auth_User {
 			'view_flag' => TRUE,
 			'display_order' => 60,
 		),
-		'inactive_flag' => array(
+		'active_flag' => array(
 			'field_type' => 'checkbox',
 			'list_flag' => TRUE,
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 70,
+			'field_options' => array(
+				'default_value' => 1,
+			),
 		),
 		'login_count' => array(
 			'field_type' => 'text',
@@ -261,7 +264,7 @@ class Model_cl4_User extends Model_Auth_User {
 	*/
 	public function add_login_where($username) {
 		$this->where('username', '=', $username)
-			->where('inactive_flag', '=', 0);
+			->where('active_flag', '=', 0);
 
 		return $this;
 	} // function add_login_where

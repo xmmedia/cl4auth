@@ -9,7 +9,7 @@ class Model_cl4_UserProfile extends Model_User {
 			'password' => array(
 				'edit_flag' => FALSE,
 			),
-			'inactive_flag' => array(
+			'active_flag' => array(
 				'edit_flag' => FALSE,
 			),
 			'login_count' => array(
