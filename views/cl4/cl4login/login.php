@@ -10,13 +10,13 @@
 		<li>
 			<ul>
 				<li class="field_label"><label>Username</label></li>
-				<li class="field_value"><?php echo Form::input('username', $username, array('size' => 20, 'maxlength' => 100)); ?></li>
+				<li class="field_value"><?php echo Form::input('username', $username, array('size' => 20, 'maxlength' => 100, 'id' => 'username')); ?></li>
 			</ul>
 		</li>
 		<li>
 			<ul>
 				<li class="field_label"><label>Password</label></li>
-				<li class="field_value"><?php echo Form::password('password', $password, array('size' => 20, 'maxlength' => 42)); ?></li>
+				<li class="field_value"><?php echo Form::password('password', $password, array('size' => 20, 'maxlength' => 42, 'id' => 'password')); ?></li>
 			</ul>
 		</li>
 	</ul>
