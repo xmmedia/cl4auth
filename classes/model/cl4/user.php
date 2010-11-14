@@ -264,7 +264,7 @@ class Model_cl4_User extends Model_Auth_User {
 	*/
 	public function add_login_where($username) {
 		$this->where('username', '=', $username)
-			->where('active_flag', '=', 0);
+			->where('active_flag', '=', 1);
 
 		return $this;
 	} // function add_login_where
