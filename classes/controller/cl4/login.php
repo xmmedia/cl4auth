@@ -13,7 +13,7 @@ class Controller_cl4_Login extends Controller_Base {
 		// If user already signed-in
 		if (Auth::instance()->logged_in() === TRUE){
 			// redirect to the user account
-			Request::instance()->redirect('account/profile');
+			$this->login_success_redirect();
 		}
 
 		$timed_out = cl4::get_param('timed_out');
@@ -42,14 +42,14 @@ class Controller_cl4_Login extends Controller_Base {
 					$next_controller = new $next_controller($redirect_request);
 					if (Auth::instance()->allowed($next_controller, $redirect_request->action)) {
 						// they have permission to access the page, so redirect them there
-						Request::instance()->redirect($redirect);
+						$this->login_success_redirect($redirect);
 					} else {
 						// they don't have permission to access the page, so just go to the default page
-						Request::instance()->redirect('account/profile');
+						$this->login_success_redirect();
 					}
 				} else {
 					// redirect to the user account
-					Request::instance()->redirect('account/profile');
+					$this->login_success_redirect();
 				}
 			} else {
 				// Get errors for display in view and set the username and password to populate the fields (makes it easier for the user)
@@ -74,6 +74,21 @@ class Controller_cl4_Login extends Controller_Base {
 $('#username').focus();
 EOA;
 	} // function
+
+	/**
+	* Redirects the user the first page they should see after login
+	* $redirect contains the page they may have requested before logging in and they should be redirected there
+	*
+	* @param  string  $redirect
+	* @return  void  never returns
+	*/
+	protected function login_success_redirect($redirect = NULL) {
+		if ( ! empty($redirect)) {
+			Request::instance()->redirect($redirect);
+		} else {
+			Request::instance()->redirect('account/profile');
+		}
+	} // function login_success_redirect
 
 	/**
 	* Log the user out.
