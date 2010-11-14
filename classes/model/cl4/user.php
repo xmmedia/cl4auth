@@ -185,9 +185,9 @@ class Model_cl4_User extends Model_Auth_User {
 		$status = FALSE;
 
 		if ($array->check()) {
-			// Attempt to load the user
-			// todo: add checking for inactive and expired users
-			$this->where('username', '=', $array['username'])->find();
+			// Attempt to load the user, adding the where clause
+			$this->add_login_where($array['username'])
+				->find();
 
 			// if there are too many recent failed logins, fail now
 			if ($this->_loaded && $this->failed_login_count > 5 && strtotime($this->last_failed_login) > strtotime('-5 minutes') ) {
@@ -206,6 +206,7 @@ class Model_cl4_User extends Model_Auth_User {
 					$auth_type = $auth_types['logged_in'];
 
 				} else {
+					// there was a problem logging them in, but set failed counts and date/time or set type to unknown username/password if user doesn't exist
 					if ($this->_loaded && is_numeric($this->id) && $this->id != 0) {
 						// only save if the user exists
 						$this->failed_login_count = DB::expr('failed_login_count + 1');
@@ -251,6 +252,26 @@ class Model_cl4_User extends Model_Auth_User {
 		return $status;
 	} // function login
 
+	/**
+	* Adds the where clause to the object for login checking
+	*
+	* @chainable
+	* @param  string  $username  The username to check with
+	* @return ORM
+	*/
+	public function add_login_where($username) {
+		$this->where('username', '=', $username)
+			->where('inactive_flag', '=', 0);
+
+		return $this;
+	} // function add_login_where
+
+	/**
+	* Logout the user
+	* Records an auth_log record with type logged_out
+	* Performs Auth::logout()
+	*
+	*/
 	public function logout() {
 		$auth_types = Kohana::config('cl4login.auth_type');
 
