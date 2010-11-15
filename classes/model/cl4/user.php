@@ -171,8 +171,9 @@ class Model_cl4_User extends Model_Auth_User {
 	* @param   array    values to check (passed by reference)
 	* @return  boolean
 	*/
-	public function login(array & $array, $redirect = FALSE) {
-		$array = Validate::factory($array)
+	public function login(array & $login_details, $redirect = FALSE) {
+
+		$login_details = Validate::factory($login_details)
 			->label('username', $this->_labels['username'])
 			->label('password', $this->_labels['password'])
 			->filter('username', 'trim')
@@ -180,16 +181,17 @@ class Model_cl4_User extends Model_Auth_User {
 			->rules('password', $this->_rules['password']);
 
 		// Get the remember login option
-		$remember = ! empty($array['remember']);
+		$remember = ! empty($login_details['remember']);
 
 		$auth_types = Kohana::config('cl4login.auth_type');
 
 		// Login starts out invalid
 		$status = FALSE;
 
-		if ($array->check()) {
+		if ($login_details->check()) {
+
 			// Attempt to load the user, adding the where clause
-			$this->add_login_where($array['username'])
+			$this->add_login_where($login_details['username'])
 				->find();
 
 			// if there are too many recent failed logins, fail now
@@ -199,11 +201,11 @@ class Model_cl4_User extends Model_Auth_User {
 				$this->last_failed_login = DB::expr('NOW()');
 				$this->save();
 
-				$array->error(NULL, 'too_many_attempts');
+				$login_details->error(NULL, 'too_many_attempts');
 				$auth_type = $auth_types['too_many_attempts'];
 
 			} else {
-				if ($this->_loaded && Auth::instance()->login($this, $array['password'], $remember)) {
+				if ($this->_loaded && Auth::instance()->login($this, $login_details['password'], $remember)) {
 					// Login is successful
 					$status = TRUE;
 					$auth_type = $auth_types['logged_in'];
