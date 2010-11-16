@@ -207,7 +207,6 @@ class Model_cl4_User extends Model_Auth_User {
 					// Login is successful
 					$status = TRUE;
 					$auth_type = $auth_types['logged_in'];
-					$this->successful_login_actions(); // doesn't do anything unless overidden
 				} else {
 					// there was a problem logging them in, but set failed counts and date/time or set type to unknown username/password if user doesn't exist
 					if ($this->_loaded && is_numeric($this->id) && $this->id != 0) {
@@ -253,12 +252,6 @@ class Model_cl4_User extends Model_Auth_User {
 
 		return $status;
 	} // function login
-
-	/**
-	* this is a placeholder function that can be overidden to handle additional login actions
-	*
-	*/
-	public function successful_login_actions() { }
 
 	/**
 	* Adds the where clause to the object for login checking
