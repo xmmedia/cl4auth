@@ -216,7 +216,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	} // function _login
 
 	/**
-	* put your comment there...
+	*
 	*
 	* @param mixed $password
 	* @param mixed $salt

@@ -24,6 +24,8 @@ class Controller_cl4_Account extends Controller_Base {
 	* Redirects to the profile action
 	*/
 	public function action_cancel() {
+		Message::add('Your last action was cancelled.', Message::$notice);
+
 		Request::instance()->redirect('account/profile');
 	}
 
@@ -39,16 +41,19 @@ class Controller_cl4_Account extends Controller_Base {
 		// use the user loaded from auth to get the user profile model (extends user)
 		$model = ORM::factory('userprofile', $user->id, array(
 			'display_reset' => FALSE,
+			'hidden_fields' => array(
+				Form::hidden('form', 'profile'),
+			),
 		));
 
-		if ( ! empty($_POST)) {
+		if ( ! empty($_POST) && ! empty($_POST['form']) && $_POST['form'] == 'profile') {
 			$validate = $model->save_values()->validate_profile_edit();
 
 			// If the post data validates using the rules setup in the user model
 			if ($validate === TRUE) {
 				try {
 					// save first, so that the model has an id when the relationships are added
-					$model->save();
+					ORM::factory('userpassword', $user->id)->save();
 					// message: save success
 					Message::add(__(Kohana::message('account', 'profile_saved')), Message::$notice);
 					// redirect and exit
@@ -79,13 +84,14 @@ class Controller_cl4_Account extends Controller_Base {
 		// get the current user from auth
 		$user = Auth::instance()->get_user();
 
-		if ( ! empty($_POST)) {
+		if ( ! empty($_POST) && ! empty($_POST['form']) && $_POST['form'] == 'password') {
 			$validation = $user->validate_change_password($_POST);
 
 			// check if there are any errors
 			if (count($validation->errors()) == 0) {
 				try {
-					$user->save_values($validation)
+					ORM::factory('userpassword', $user->id)
+						->values(array('password' => $_POST['new_password']))
 						->save();
 
 					Message::add(__(Kohana::message('account', 'password_changed')), Message::$notice);
@@ -103,7 +109,9 @@ class Controller_cl4_Account extends Controller_Base {
 			}
 		} // if
 
-		$this->template->body_html = View::factory('cl4/cl4account/password');
+		$this->action_profile();
+
+		//$this->template->body_html = View::factory('cl4/cl4account/password');
 	} // function action_password
 
 	/**
