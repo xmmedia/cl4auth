@@ -172,7 +172,6 @@ class Model_cl4_User extends Model_Auth_User {
 	* @return  boolean
 	*/
 	public function login(array & $login_details, $redirect = FALSE) {
-
 		$login_details = Validate::factory($login_details)
 			->label('username', $this->_labels['username'])
 			->label('password', $this->_labels['password'])
@@ -189,7 +188,6 @@ class Model_cl4_User extends Model_Auth_User {
 		$status = FALSE;
 
 		if ($login_details->check()) {
-
 			// Attempt to load the user, adding the where clause
 			$this->add_login_where($login_details['username'])
 				->find();
@@ -260,8 +258,7 @@ class Model_cl4_User extends Model_Auth_User {
 	* this is a placeholder function that can be overidden to handle additional login actions
 	*
 	*/
-	public function successful_login_actions() {
-	}
+	public function successful_login_actions() { }
 
 	/**
 	* Adds the where clause to the object for login checking
@@ -353,28 +350,10 @@ class Model_cl4_User extends Model_Auth_User {
 	* @param 	array	$array	The POST
 	* @return 	object	The validation object
 	*/
-	public function validate_profile_edit($array = array()) {
-		if ( ! empty($array['password'])) {
-			// user cannot change their password if this run
-			unset($array['password']);
-		}
+	public function validate_profile_edit() {
+		unset($this->_rules['password'], $this->_rules['password_confirm']);
 
-		$validation = Validate::factory($array)
-			->label('username', $this->_labels['username'])
-			->label('first_name', $this->_labels['first_name'])
-			->label('last_name', $this->_labels['last_name'])
-			->rules('username', $this->_rules['username'])
-			->rules('first_name', $this->_rules['first_name'])
-			->rules('last_name', $this->_rules['last_name'])
-			->filter('username', 'trim')
-			->filter('first_name', 'trim')
-			->filter('last_name', 'trim');
-
-		// pass parameter via object
-		// this is the object and username_available is the method to call
-		$validation->callback('username', array($this, 'username_available'));
-
-		return $validation;
+		return $this->check();
 	} // function
 
 	/**
@@ -383,8 +362,8 @@ class Model_cl4_User extends Model_Auth_User {
 	* @param 	array	$array	The POST
 	* @return 	object	The validation object
 	*/
-	public function validate_change_password($array = array()) {
-		$validation = Validate::factory($array)
+	public function validate_change_password($post) {
+		$validation = Validate::factory($post)
 			->label('current_password', 'Current Password')
 			->label('new_password', 'New Password')
 			->label('new_password_confirm', 'Confirm New Password')
@@ -392,7 +371,13 @@ class Model_cl4_User extends Model_Auth_User {
 			->rules('new_password', $this->_rules['password'])
 			->rules('new_password_confirm', array(
 				'matches' => array('new_password')
-		));
+			));
+
+		$validation->check();
+
+		if (Auth::instance()->hash_password($post['current_password']) !== $this->password) {
+			$validation->error('current_password', 'not_the_same');
+		}
 
 		return $validation;
 	} // function

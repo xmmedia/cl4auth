@@ -15,8 +15,10 @@ return array(
 	'new_password_confirm' => array(
 		'matches' => 'Both the new passwords must be the same.',
 	),
+	'current_password' => array(
+		'not_the_same' => 'Your current password is incorrect.',
+	),
 	'password_changed' => 'Your password has been changed.',
-	'current_password' => 'Your current password is incorrect.',
 	'password_change_error' => 'There was a problem updating your password. Please try again.',
 	'password_change_validation' => 'Your password could not be changed because of the following: ',
 	// forgot password

@@ -41,32 +41,27 @@ class Controller_cl4_Account extends Controller_Base {
 			'display_reset' => FALSE,
 		));
 
-		if ( ! empty($_POST) && is_numeric($user->id)) {
-			// editing requires that the username and email do not exist (EXCEPT for this ID)
-			$validate = $model->validate_profile_edit($_POST);
+		if ( ! empty($_POST)) {
+			$validate = $model->save_values()->validate_profile_edit();
 
 			// If the post data validates using the rules setup in the user model
-			if ($validate->check()) {
+			if ($validate === TRUE) {
 				try {
-					// Affects the sanitized vars to the user object
-					$model->values($validate);
 					// save first, so that the model has an id when the relationships are added
 					$model->save();
 					// message: save success
-					Message::add(__(Kohana::message('user', 'profile_saved')), Message::$notice);
+					Message::add(__(Kohana::message('account', 'profile_saved')), Message::$notice);
 					// redirect and exit
 					Request::instance()->redirect('account/profile');
-					return;
+
 				} catch (Exception $e) {
-					Message::add(__(Kohana::message('user', 'profile_save_error')), Message::$error);
-					throw $e;
+					cl4::exception_handler($e);
+					Message::add(__(Kohana::message('account', 'profile_save_error')), Message::$error);
 				}
 
 			} else {
-				// put the sanitized values into the model so we can redisplay the form with the values
-				$model->values($validate);
 				// Get errors for display in view
-				Message::add(__(Kohana::message('user', 'profile_save_validation')) . Message::add_validate_errors($validate, 'user'), Message::$error);
+				Message::add(__(Kohana::message('account', 'profile_save_validation')) . Message::add_validate_errors($validate, 'user'), Message::$error);
 			}
 		} // if
 
@@ -76,7 +71,7 @@ class Controller_cl4_Account extends Controller_Base {
 				'form_action' => '/account/profile',
 				'form_id' => 'editprofile',
 			)));
-	} // function
+	} // function action_profile
 
 	public function action_password() {
 		$this->template->page_title = 'Change Password';
@@ -84,45 +79,32 @@ class Controller_cl4_Account extends Controller_Base {
 		// get the current user from auth
 		$user = Auth::instance()->get_user();
 
-		if ( ! empty($_POST) && is_numeric($user->id)) {
-			// use the user loaded from auth to get the user profile model (extends user)
-			$model = ORM::factory('user', $user->id);
-
-			// set the validation that needs to be done; returns validate object
-			$validate = $model->validate_change_password($_POST);
-			// check to see if everything is good; adds errors array in validation object
-			$validate->check();
-
-			// checks if the password entered matches the current password (the one in the DB)
-			if (Auth::instance()->hash_password($validate['current_password']) !== $model->password) {
-				$validate->error('current_password', NULL);
-			}
+		if ( ! empty($_POST)) {
+			$validation = $user->validate_change_password($_POST);
 
 			// check if there are any errors
-			if (count($validate->errors()) == 0) {
+			if (count($validation->errors()) == 0) {
 				try {
-					// update the password
-					$model->password = $validate['new_password'];
-					// save the record
-					$model->save();
+					$user->save_values($validation)
+						->save();
 
-					Message::add(__(Kohana::message('user', 'password_changed')), Message::$notice);
+					Message::add(__(Kohana::message('account', 'password_changed')), Message::$notice);
 
 					// redirect and exit
 					Request::instance()->redirect('account/profile');
-					return;
+
 				} catch (Exeception $e) {
-					Message::add(__(Kohana::message('user', 'password_change_error')), Message::$error);
-					throw $e;
+					cl4::exception_handler($e);
+					Message::add(__(Kohana::message('account', 'password_change_error')), Message::$error);
 				}
 
 			} else {
-				Message::add(__(Kohana::message('user', 'password_change_validation')) . Message::add_validate_errors($validate, 'user'), Message::$error);
+				Message::add(__(Kohana::message('account', 'password_change_validation')) . Message::add_validate_errors($validation, 'account'), Message::$error);
 			}
-		}
+		} // if
 
 		$this->template->body_html = View::factory('cl4/cl4account/password');
-	} // function
+	} // function action_password
 
 	/**
 	 * Registers a new user.
@@ -236,17 +218,17 @@ class Controller_cl4_Account extends Controller_Base {
 
 					$mail->Send();
 
-					Message::add(__(Kohana::message('user', 'reset_link_sent')), Message::$notice);
+					Message::add(__(Kohana::message('account', 'reset_link_sent')), Message::$notice);
 				} catch (Exception $e) {
-					Message::add(__(Kohana::message('user', 'forgot_send_error')), Message::$error);
+					Message::add(__(Kohana::message('account', 'forgot_send_error')), Message::$error);
 					throw $e;
 				}
 
 			} else if (in_array($user->username, $default_options['admin_accounts'])) {
-				Message::add(__(Kohana::message('user', 'reset_admin_account')), Message::$warning);
+				Message::add(__(Kohana::message('account', 'reset_admin_account')), Message::$warning);
 
 			} else {
-				Message::add(__(Kohana::message('user', 'reset_not_found')), Message::$warning);
+				Message::add(__(Kohana::message('account', 'reset_not_found')), Message::$warning);
 			}
 		}
 
@@ -281,7 +263,7 @@ class Controller_cl4_Account extends Controller_Base {
 					$user->failed_login_count = 0; // reset the login count
 					$user->save();
 				} catch (Exception $e) {
-					Message::add(__(Kohana::message('user', 'password_email_error')), Message::$error);
+					Message::add(__(Kohana::message('account', 'password_email_error')), Message::$error);
 					throw $e;
 				}
 
@@ -301,22 +283,22 @@ class Controller_cl4_Account extends Controller_Base {
 
 					$mail->Send();
 
-					Message::add(__(Kohana::message('user', 'password_emailed')), Message::$notice);
+					Message::add(__(Kohana::message('account', 'password_emailed')), Message::$notice);
 
 				} catch (Exception $e) {
-					Message::add(__(Kohana::message('user', 'password_email_error')), Message::$error);
+					Message::add(__(Kohana::message('account', 'password_email_error')), Message::$error);
 					throw $e;
 				}
 
 				Request::instance()->redirect('login');
 
 			} else {
-				Message::add(__(Kohana::message('user', 'password_email_username_not_found')), Message::$error);
+				Message::add(__(Kohana::message('account', 'password_email_username_not_found')), Message::$error);
 				Request::instance()->redirect('account/forgot');
 			}
 
 		} else {
-			Message::add(__(Kohana::message('user', 'password_email_partial')), Message::$error);
+			Message::add(__(Kohana::message('account', 'password_email_partial')), Message::$error);
 			Request::instance()->redirect('account/forgot');
 		}
 	} // function
