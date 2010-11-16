@@ -199,7 +199,7 @@ class Model_cl4_User extends Model_Auth_User {
 				$this->last_failed_login = DB::expr('NOW()');
 				$this->save();
 
-				$login_details->error(NULL, 'too_many_attempts');
+				$login_details->error('username', 'too_many_attempts');
 				$auth_type = $auth_types['too_many_attempts'];
 
 			} else {
@@ -222,8 +222,7 @@ class Model_cl4_User extends Model_Auth_User {
 					}
 
 					// add a custom message found in message/login.php
-					$array->error('username', 'invalid');
-
+					$login_details->error('username', 'invalid');
 				} // if
 			} // if
 		} else {
@@ -251,6 +250,7 @@ class Model_cl4_User extends Model_Auth_User {
 				))
 				->execute($this->_db);
 		}
+
 		return $status;
 	} // function login
 
@@ -293,13 +293,13 @@ class Model_cl4_User extends Model_Auth_User {
 
 		// Sign out the user
 		// The TRUE parameter triggers the logout to delete everything in the session
-		Auth::instance()->logout(TRUE);
+		return Auth::instance()->logout();
 	} // function
 
 	/**
 	* Complete the login for a user by incrementing the logins and saving login timestamp
 	*
-	* @return void
+	* @return ORM
 	*/
 	public function complete_login() {
 		if ( ! $this->_loaded) {
@@ -317,6 +317,8 @@ class Model_cl4_User extends Model_Auth_User {
 
 		// Save the user
 		$this->save();
+
+		return $this;
 	} // function
 
 	/**
@@ -328,7 +330,7 @@ class Model_cl4_User extends Model_Auth_User {
 	* @todo		is there a way to do this with the ORM?
 	*/
 	public function permission($permission) {
-		$rows = DB::select(array('COUNT("*")', 'total_count'))
+		$rows = DB::select(array(DB::expr('COUNT(*)'), 'total_count'))
 			->from(array('user_group', 'ug'))
 			->join(array('group_permission', 'gp'), 'INNER')
 			->on('ug.group_id', '=', 'gp.group_id')
@@ -375,7 +377,7 @@ class Model_cl4_User extends Model_Auth_User {
 
 		$validation->check();
 
-		if (Auth::instance()->hash_password($post['current_password']) !== $this->password) {
+		if ( ! Auth::instance()->check_password($post['current_password'])) {
 			$validation->error('current_password', 'not_the_same');
 		}
 

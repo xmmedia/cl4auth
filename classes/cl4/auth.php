@@ -35,6 +35,20 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	} // function logged_in
 
 	/**
+	 * Log out a user by removing the related session variables.
+	 * Also removes the auth timestamp_key
+	 *
+	 * @param   boolean  completely destroy the session
+	 * @param   boolean  remove all tokens for user
+	 * @return  boolean
+	 */
+	public function logout($destroy = FALSE, $logout_all = FALSE) {
+		$this->_session->delete($this->_config['timestamp_key']);
+
+		return parent::logout($destroy, $logout_all);
+	} // function logout
+
+	/**
 	* Checks to see if the currently logged in user has access to the specific permission
 	*
 	* @param 	mixed	$permission		If a string, then the user is required to have that permission; if it's an array then they need to have all the permissions
@@ -203,7 +217,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 
 				// Set the autologin cookie
 				Cookie::set('authautologin', $token->token, $this->_config['remember_lifetime']);
-			}
+			} // if
 
 			// Finish the login
 			$this->complete_login($user);
@@ -214,19 +228,6 @@ class cl4_Auth extends Kohana_Auth_ORM {
 		// Login failed
 		return FALSE;
 	} // function _login
-
-	/**
-	*
-	*
-	* @param mixed $password
-	* @param mixed $salt
-	* @return string
-	*
-	* @todo	decide what to do here: this is just a hack to get it working; we should instead do sha1 or similar with a salt
-	*/
-	public function hash_password($password, $salt = FALSE) {
-		return md5($password);
-	} // function
 
 	/**
 	* Generates a random password without any special characters (only alpha numeric) $length characters long

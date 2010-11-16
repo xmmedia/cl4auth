@@ -13,6 +13,8 @@ return array(
 		'min_length' => ':field must be an email address.',
 		'max_length' => ':field must be an email address.',
 		'username_available' => 'The username/email address entered is already used. Please use a different email address.',
+		'too_many_attempts' => 'There have been too many attempts on this account. The account will be locked for 5 minutes.',
+		'logged_out' => 'You have been logged out successfully.',
 	),
 	'password' => array(
 		'not_empty' => ':field must not be empty.',

@@ -91,17 +91,19 @@ EOA;
 	} // function login_success_redirect
 
 	/**
-	* Log the user out.
+	* Log the user out and redirects to the login page.
 	*/
 	public function action_logout() {
 		try {
 			if (Auth::instance()->get_user()) {
-				Auth::instance()->get_user()->logout();
+				if ( ! Auth::instance()->get_user()->logout()) {
+					throw new Kohana_Exception('There was a problem logging out the user');
+				}
 
-				Message::add(__(Kohana::message('user', 'logged_out')), Message::$notice);
+				Message::add(__(Kohana::message('user', 'username.logged_out')), Message::$notice);
 			}
 		} catch (Exception $e) {
-			throw $e;
+			cl4::exception_handler($e);
 		}
 
 		// redirect to the user account and then the signin page if logout worked as expected
