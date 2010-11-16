@@ -42,7 +42,7 @@ class Model_cl4_User extends Model_Auth_User {
 	protected $_labels = array(
 		'id' => 'ID',
 		'date_expired' => 'Date Expired',
-		'username' => 'Username',
+		'username' => 'Email (Username)',
 		'password' => 'Password',
 		'password_confirm' => 'Password Confirm',
 		'first_name' => 'First Name',

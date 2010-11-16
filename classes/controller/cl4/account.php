@@ -9,6 +9,7 @@ class Controller_cl4_Account extends Controller_Base {
 	public $secure_actions = array(
 		'profile' => TRUE,
 		'password' => TRUE,
+		'cancel' => TRUE,
 	);
 
 	/**
@@ -20,6 +21,13 @@ class Controller_cl4_Account extends Controller_Base {
 	} // function
 
 	/**
+	* Redirects to the profile action
+	*/
+	public function action_cancel() {
+		Request::instance()->redirect('account/profile');
+	}
+
+	/**
 	* View: Profile editor
 	*/
 	public function action_profile() {
@@ -29,7 +37,9 @@ class Controller_cl4_Account extends Controller_Base {
 		// get the current user from auth
 		$user = Auth::instance()->get_user();
 		// use the user loaded from auth to get the user profile model (extends user)
-		$model = ORM::factory('userprofile', $user->id);
+		$model = ORM::factory('userprofile', $user->id, array(
+			'display_reset' => FALSE,
+		));
 
 		if ( ! empty($_POST) && is_numeric($user->id)) {
 			// editing requires that the username and email do not exist (EXCEPT for this ID)
