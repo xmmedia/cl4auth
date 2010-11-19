@@ -3,10 +3,14 @@
 class Model_cl4_UserAdmin extends Model_User {
 	protected $_override_properties = array(
 		'_rules' => array(
-			'password' => array(
-				'min_length' => array(5),
-				'max_length' => array(42),
-			),
+			// remove the validation for password and password_confirm as we'll be a callback instead because we need to check if the values have been passed
+			'password' => array(),
+			'password_confirm' => array(),
+		),
+
+		'_callbacks' => array(
+			// add a callback to check the password
+			'password' => array('check_password'),
 		),
 
 		'_table_columns' => array(

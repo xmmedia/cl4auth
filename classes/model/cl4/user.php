@@ -24,11 +24,13 @@ class Model_cl4_User extends Model_Auth_User {
 			'max_length' => array(100),
 		),
 		'password' => array(
+			// these rules are also in check_password()
 			'not_empty'  => NULL,
 			'min_length' => array(5),
 			'max_length' => array(42),
 		),
 		'password_confirm' => array(
+			// these rules are also in check_password()
 			'matches'    => array('password'),
 		),
 	);
@@ -160,7 +162,6 @@ class Model_cl4_User extends Model_Auth_User {
 
 	protected $_expires_column = array(
 		'column' 	=> 'expiry_date',
-		'format' 	=> 'Y-m-j H:i:s',
 		'default'	=> 0,
 	);
 
@@ -376,4 +377,46 @@ class Model_cl4_User extends Model_Auth_User {
 
 		return $validation;
 	} // function
+
+	/**
+	* Checks the password for an admin page
+	* On admin, there will be 2 fields (likely password and password_confirm) although they do not need to be entered
+	* This will check to see if either of the fields are not empty
+	* If both the fields are empty or not set, then the field will be removed from the _changed array if it's set (ORM_Password sets the field even if it's empty)
+	* If either of the fields have values, then it will create a validation object for these 2 fields, add rules and validate
+	* If there are errors, then it will add the errors to the passed validation object
+	* This function has customized rules that are also in this object
+	*
+	* @param Validate $array
+	* @param string $field
+	*/
+	public function check_password(Validate $array, $field) {
+		if ( ! empty($array[$field]) || ! empty($array[$field . '_confirm'])) {
+			$validation = Validate::factory(array(
+					$field => isset($array[$field]) ? $array[$field] : NULL,
+					$field . '_confirm' => isset($array[$field . '_confirm']) ? $array[$field . '_confirm'] : NULL,
+				))
+				->label('password', $this->_labels['password'])
+				->label($field . '_confirm', $this->_labels[$field . '_confirm'])
+				->rules('password', array(
+					'not_empty'  => NULL,
+					'min_length' => array(5),
+					'max_length' => array(42),
+				))
+				->rules($field . '_confirm', array(
+					'matches' => array('password')
+				));
+
+			if ( ! $validation->check()) {
+				foreach ($validation->errors() as $field => $error) {
+					$array->error($field, $error[0], $error[1]);
+				}
+			}
+
+		} else {
+			if (isset($this->_changed[$field])) {
+				unset($this->_changed[$field]);
+			}
+		}
+	} // function check_password
 } // class
