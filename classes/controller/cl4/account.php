@@ -212,7 +212,7 @@ class Controller_cl4_Account extends Controller_Base {
 					$mail->add_user($user->id);
 					$mail->Subject = LONG_NAME . ' Password Reset';
 
-					$url = URL_ROOT . '/account/reset?' . http_build_query(array(
+					$url = 'account/reset?' . http_build_query(array(
 						'username' => $user->username,
 						'reset_token' => $user->reset_token,
 					), '', '&');
