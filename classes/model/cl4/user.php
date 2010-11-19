@@ -241,7 +241,7 @@ class Model_cl4_User extends Model_Auth_User {
 			DB::insert('auth_log')
 				->columns(array('username', 'access_time', 'auth_type_id', 'browser', 'ip_address'))
 				->values(array(
-					$array['username'],
+					$login_details['username'],
 					DB::expr('NOW()'),
 					'auth_type_id' => $auth_type,
 					'browser' => ! empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
