@@ -22,34 +22,8 @@ class Model_cl4_AuthLog extends ORM {
 	// column definitions
 	protected $_table_columns = array(
 		/**
-		* for reference, here is a complete sample set of cl4 column meta data and the defaults
-		* 'column_name' => array(
-		*	'field_type' => 'text',
-		*	'list_flag' => TRUE,
-		*	'edit_flag' => TRUE,
-		*	'search_flag' => TRUE,
-		*	'view_flag' => TRUE,
-		*	'field_size' => 30,
-		*	'max_length' => 255,
-		*	'min_width' => 0,
-		*	'textarea_cols' => 100,
-		*	'textarea_rows' => 5,
-		*	'source_data' => '',
-		*	'source_label' => 'name',
-		*	'source_value' => 'id',
-		*	'file_options' => array(
-		*		'destination_folder' => '',
-		*		'name_change_method' => 'keep',
-		*		'name_change_text' => '',
-		*		'original_filename_column' => '',
-		*		'file_download_url' => '',
-		*		'lowercase_filename' => TRUE,
-		*		'clean_filename' => FALSE,
-		*		'ext_check_only' => FALSE,
-		*		'overwrite' => FALSE,
-		*		'allow_any_file_type' => FALSE,
-		*		'allowed_types' => Array,
-		*	),
+		* see http://v3.kohanaphp.com/guide/api/Database_MySQL#list_columns for all possible column attributes
+		* see the modules/cl4/config/cl4orm.php for a full list of cl4-specific options and documentation on what the options do
 		*/
 		'id' => array(
 			'field_type' => 'hidden',

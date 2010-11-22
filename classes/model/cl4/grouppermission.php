@@ -24,6 +24,10 @@ class Model_cl4_GroupPermission extends ORM {
 
 	// column definitions
 	protected $_table_columns = array(
+		/**
+		* see http://v3.kohanaphp.com/guide/api/Database_MySQL#list_columns for all possible column attributes
+		* see the modules/cl4/config/cl4orm.php for a full list of cl4-specific options and documentation on what the options do
+		*/
 		'id' => array(
 			'field_type' => 'hidden',
 			'display_order' => 10,
