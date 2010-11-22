@@ -86,7 +86,8 @@ EOA;
 		if ( ! empty($redirect)) {
 			Request::instance()->redirect($redirect);
 		} else {
-			Request::instance()->redirect('account/profile');
+			$default_redirect = Kohana::config('auth.default_login_redirect');
+			Request::instance()->redirect($default_redirect);
 		}
 	} // function login_success_redirect
 
@@ -120,7 +121,7 @@ EOA;
 
 		$user = Auth::instance()->get_user();
 
-		$max_lifetime = Kohana::config('auth')->get('timed_out_max_lifetime');
+		$max_lifetime = Kohana::config('auth.timed_out_max_lifetime');
 
 		if ( ! $user || ($max_lifetime > 0 && Auth::instance()->timed_out($max_lifetime))) {
 			// user is not logged in at all or they have reached the maximum amount of time we allow sometime to stay logged in, so redirect them to the login page
