@@ -6,7 +6,6 @@ class Model_cl4_Permission extends ORM {
 	protected $_table_names_plural = FALSE;
 	protected $_table_name = 'permission';
 	public $_table_name_display = 'Permission';
-	protected $_primary_val = 'value'; // default: name (column used as primary value)
 
 	// Relationships
 	protected $_has_many = array('group' => array('through' => 'group_permission'));
@@ -75,6 +74,6 @@ class Model_cl4_Permission extends ORM {
 
 	// Filters
 	protected $_filters = array(
-	    TRUE => array('trim' => array()),
+		TRUE => array('trim' => array()),
 	);
 } // class

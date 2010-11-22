@@ -3,12 +3,9 @@
  * Default permission
  */
 class Model_cl4_Group extends ORM {
-
 	protected $_table_names_plural = FALSE;
 	protected $_table_name = 'group';
 	public $_table_name_display = 'Group';
-	protected $_primary_key = 'id'; // default: id
-	protected $_primary_val = 'name'; // default: name (column used as primary value)
 
 	// Relationships
 	protected $_has_many = array(
@@ -65,6 +62,6 @@ class Model_cl4_Group extends ORM {
 
 	// Filters
 	protected $_filters = array(
-	    TRUE => array('trim' => array()),
+		TRUE => array('trim' => array()),
 	);
 } // class
