@@ -12,7 +12,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	/**
 	* Checks if a session is active.
 	*
-	* @param   mixed    permission string or array with permissions
+	* @param   mixed    permission string or array of permissions
 	* @return  boolean
 	*/
 	public function logged_in($permission = NULL) {
@@ -125,8 +125,20 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	/**
 	* Checks the permissions of the user based on the $auth_required and $secure_actions in the controller that would be doing the request
 	*
+	* Here are the use cases related to the controller:
+	*  - public: entire controller is public
+	*     auth_required = FALSE (everything else ignored)
+	*  - logged in: user must be logged in, although no other permissions required (something like the account controller)
+	*     auth_required = TRUE && secure_actions = FALSE
+	*  - logged in + own checking: the same as above, but you are doing your own checking within the controller (like claeroadmin)
+	*     auth_required = TRUE && secure_actions = FALSE
+	*  - logged in + specific permission(s): a specific permission is required to access the action; with multiple permissions all of them are required
+	*     auth_required = TRUE && (secure_action['action'] = 'perm' || secure_action['action'] = array('perm1', 'perm2'))
+	*  - logged in + specific action can be accessed by anyone: must be logged in, but the specific permission is accessible to anyone, while other permissions have specific permissions (works in conjunction with previous one)
+	*     auth_required = TRUE && secure_action = FALSE
+	*
 	* @param 	mixed 	$controller		The name of the controller (only the suffix, Account of Controller_Account) or the controller object
-	* @param 	mixed 	$action_name	The action to check the permissions against
+	* @param 	string 	$action_name	The action to check the permissions against
 	* @return	bool
 	*/
 	public function controller_allowed($controller, $action_name) {
@@ -136,25 +148,54 @@ class cl4_Auth extends Kohana_Auth_ORM {
 			$controller = new $controller(Request::instance());
 		}
 
+		// no auth required
+		if ($controller->auth_required === FALSE) {
+			// allowed: public controller
+			return TRUE;
+		}
+
 		$logged_in = $this->logged_in();
 
-		// Check user auth and permission
-		// see more documentation on how this works on the object properties $auth_required and $secure_actions
 		// auth is required AND the user is not logged in
-		if (($controller->auth_required && ! $logged_in)
-			// OR auth is required AND the secure actions is an array AND the action is not set in the array (possibly missed by the user) so we don't want to allow them
-			|| ($controller->auth_required && is_array($controller->secure_actions) && ! isset($controller->secure_actions[$action_name]))
-			// OR secure actions is an array AND the action is set AND the action is set to true AND the user is not logged in
-			|| (is_array($controller->secure_actions) && isset($controller->secure_actions[$action_name]) && $controller->secure_actions[$action_name] === TRUE && ! $logged_in)
-			// OR secure_actions is an array AND the action is in the secure actions and not empty AND the action value is a string or array AND the user does not have the action or is not logged in
-			|| (is_array($controller->secure_actions) && ! empty($controller->secure_actions[$action_name]) && (is_string($controller->secure_actions[$action_name]) || is_array($controller->secure_actions[$action_name])) && ! $this->logged_in($controller->secure_actions[$action_name]))) {
-				// not allowed
-				return FALSE;
-			} else {
-				// allowed
-				return TRUE;
-			}
-	} // function
+		if ($controller->auth_required === TRUE && ! $logged_in) {
+			// not allowed
+			return FALSE;
+		}
+
+		// auth is required AND logged in AND secure actions is set to FALSE (the default)
+		if ($controller->auth_required === TRUE && $logged_in && $controller->secure_actions === FALSE) {
+			// allowed: likely doing own checking or entire controller is allowed to anyone logged in
+			return TRUE;
+		}
+
+		$secure_actions_is_array = is_array($controller->secure_actions);
+		if ($secure_actions_is_array) {
+			$action_set = isset($controller->secure_actions[$action_name]);
+		} else {
+			// the action cannot be set because secure_actions is not an array
+			$action_set = FALSE;
+		}
+
+		// auth is required AND logged in AND secure actions is an array AND the action is not set in the array
+		if ($controller->auth_required === TRUE && $logged_in && $secure_actions_is_array && ! $action_set) {
+			// allowed
+			return TRUE;
+		}
+
+		// auth is required AND logged in AND secure actions is an array AND the value of the key is a string (a permission) AND the user has the permission
+		if ($controller->auth_required === TRUE && $logged_in && $secure_actions_is_array && $action_set && (is_string($controller->secure_actions[$action_name]) || is_array($controller->secure_actions[$action_name])) && $this->logged_in($controller->secure_actions[$action_name])) {
+			return TRUE;
+		}
+
+		// the controller has auth required, but the action does not require authentication
+		// auth is required AND logged in AND secure actions is an array AND the value of the key is a string AND action is FALSE
+		if ($controller->auth_required === TRUE && $logged_in && $secure_actions_is_array && $action_set && $controller->secure_actions[$action_name] === FALSE) {
+			return TRUE;
+		}
+
+		// not allowed
+		return FALSE;
+	} // function controller_allowed
 
 	/**
 	* Checks to see if the user has timed out based on the timestamp in the session
