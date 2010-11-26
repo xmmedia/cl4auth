@@ -30,7 +30,7 @@ class Controller_cl4_Account extends Controller_Base {
 	}
 
 	/**
-	* View: Profile editor
+	* Profile edit and save (name and username)
 	*/
 	public function action_profile() {
 		// set the template title (see Controller_Base for implementation)
@@ -39,12 +39,7 @@ class Controller_cl4_Account extends Controller_Base {
 		// get the current user from auth
 		$user = Auth::instance()->get_user();
 		// use the user loaded from auth to get the user profile model (extends user)
-		$model = ORM::factory('userprofile', $user->id, array(
-			'display_reset' => FALSE,
-			'hidden_fields' => array(
-				Form::hidden('form', 'profile'),
-			),
-		));
+		$model = ORM::factory('userprofile', $user->id);
 
 		if ( ! empty($_POST) && ! empty($_POST['form']) && $_POST['form'] == 'profile') {
 			$validate = $model->save_values()->validate_profile_edit();
@@ -53,10 +48,10 @@ class Controller_cl4_Account extends Controller_Base {
 			if ($validate === TRUE) {
 				try {
 					// save first, so that the model has an id when the relationships are added
-					ORM::factory('userpassword', $user->id)->save();
-					// message: save success
+					$model->save();
+					// message: profile saved
 					Message::add(__(Kohana::message('account', 'profile_saved')), Message::$notice);
-					// redirect and exit
+					// redirect because they have changed their name, which is displayed on the page
 					Request::instance()->redirect('account/profile');
 
 				} catch (Exception $e) {
@@ -70,6 +65,14 @@ class Controller_cl4_Account extends Controller_Base {
 			}
 		} // if
 
+		// use the user loaded from auth to get the user profile model (extends user)
+		$model = ORM::factory('userprofile', $user->id, array(
+			'display_reset' => FALSE,
+			'hidden_fields' => array(
+				Form::hidden('form', 'profile'),
+			),
+		));
+
 		// prepare the view & form
 		$this->template->body_html = View::factory('cl4/cl4account/profile')
 			->set('edit_fields', $model->get_form(array(
@@ -78,6 +81,9 @@ class Controller_cl4_Account extends Controller_Base {
 			)));
 	} // function action_profile
 
+	/**
+	* Saves the updated password and then calls action_profile() to generate form
+	*/
 	public function action_password() {
 		$this->template->page_title = 'Change Password';
 
@@ -109,9 +115,8 @@ class Controller_cl4_Account extends Controller_Base {
 			}
 		} // if
 
+		// call action profile to generate the profile page with both username and email plus password fields
 		$this->action_profile();
-
-		//$this->template->body_html = View::factory('cl4/cl4account/password');
 	} // function action_password
 
 	/**
