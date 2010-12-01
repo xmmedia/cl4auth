@@ -130,7 +130,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	*     auth_required = FALSE (everything else ignored)
 	*  - logged in: user must be logged in, although no other permissions required (something like the account controller)
 	*     auth_required = TRUE && secure_actions = FALSE
-	*  - logged in + own checking: the same as above, but you are doing your own checking within the controller (like claeroadmin)
+	*  - logged in + own checking: the same as above, but you are doing your own checking within the controller (like cl4admin)
 	*     auth_required = TRUE && secure_actions = FALSE
 	*  - logged in + specific permission(s): a specific permission is required to access the action; with multiple permissions all of them are required
 	*     auth_required = TRUE && (secure_action['action'] = 'perm' || secure_action['action'] = array('perm1', 'perm2'))
