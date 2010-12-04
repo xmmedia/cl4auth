@@ -27,11 +27,19 @@ class Model_cl4_AuthLog extends ORM {
 		*/
 		'id' => array(
 			'field_type' => 'hidden',
+			'list_flag' => FALSE,
+			'edit_flag' => TRUE,
+			'search_flag' => FALSE,
+			'view_flag' => FALSE,
+			'is_nullable' => FALSE,
 		),
 		'user_id' => array(
 			'field_type' => 'select',
 			'list_flag' => TRUE,
 			'search_flag' => TRUE,
+			'edit_flag' => TRUE,
+			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 			'field_options' => array(
 				'source' => array(
 					'source' => 'sql',
@@ -43,6 +51,9 @@ class Model_cl4_AuthLog extends ORM {
 			'field_type' => 'text',
 			'list_flag' => TRUE,
 			'search_flag' => TRUE,
+			'edit_flag' => TRUE,
+			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 			'field_attributes' => array(
 				'maxlength' => 100,
 			),
@@ -50,12 +61,18 @@ class Model_cl4_AuthLog extends ORM {
 		'access_time' => array(
 			'field_type' => 'datetime',
 			'list_flag' => TRUE,
+			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
+			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 		'auth_type_id' => array(
 			'field_type' => 'select',
 			'list_flag' => TRUE,
+			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
+			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 			'field_options' => array(
 				'source' => array(
 					'source' => 'sql',
@@ -66,12 +83,18 @@ class Model_cl4_AuthLog extends ORM {
 		'browser' => array(
 			'field_type' => 'text',
 			'list_flag' => TRUE,
+			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
+			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 		'ip_address' => array(
 			'field_type' => 'text',
 			'list_flag' => TRUE,
+			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
+			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 			'field_attributes' => array(
 				'size' => 15,
 				'maxlength' => 15,

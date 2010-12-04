@@ -66,11 +66,18 @@ class Model_cl4_User extends Model_Auth_User {
 			'field_type' => 'hidden',
 			'list_flag' => FALSE,
 			'edit_flag' => TRUE,
+			'search_flag' => FALSE,
+			'view_flag' => FALSE,
 			'display_order' => 10,
+			'is_nullable' => FALSE,
 		),
 		'expiry_date' => array(
 			'field_type' => 'datetime',
-			'edit_flag' => FALSE,
+			'list_flag' => FALSE,
+			'edit_flag' => TRUE,
+			'search_flag' => FALSE,
+			'view_flag' => FALSE,
+			'is_nullable' => FALSE,
 			'display_order' => 20,
 		),
 		'username' => array(
@@ -80,12 +87,16 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 30,
+			'is_nullable' => FALSE,
 		),
 		'password' => array(
 			'field_type' => 'password_confirm',
 			'list_flag' => FALSE,
 			'edit_flag' => TRUE,
+			'search_flag' => FALSE,
+			'view_flag' => FALSE,
 			'display_order' => 40,
+			'is_nullable' => FALSE,
 		),
 		'first_name' => array(
 			'field_type' => 'text',
@@ -94,6 +105,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 50,
+			'is_nullable' => FALSE,
 		),
 		'last_name' => array(
 			'field_type' => 'text',
@@ -102,6 +114,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 60,
+			'is_nullable' => FALSE,
 		),
 		'active_flag' => array(
 			'field_type' => 'checkbox',
@@ -110,6 +123,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 70,
+			'is_nullable' => FALSE,
 			'field_options' => array(
 				'default_value' => 1,
 			),
@@ -121,6 +135,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 80,
+			'is_nullable' => FALSE,
 		),
 		'last_login' => array(
 			'field_type' => 'datetime',
@@ -129,6 +144,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 90,
+			'is_nullable' => FALSE,
 		),
 		'failed_login_count' => array(
 			'field_type' => 'text',
@@ -137,6 +153,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 100,
+			'is_nullable' => FALSE,
 		),
 		'last_failed_login' => array(
 			'field_type' => 'datetime',
@@ -145,11 +162,16 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 110,
+			'is_nullable' => FALSE,
 		),
 		'reset_token' => array(
 			'field_type' => 'text',
+			'list_flag' => FALSE,
 			'edit_flag' => FALSE,
+			'search_flag' => FALSE,
+			'view_flag' => FALSE,
 			'display_order' => 120,
+			'is_nullable' => FALSE,
 		),
 	);
 

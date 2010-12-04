@@ -33,7 +33,8 @@ class Model_cl4_UserGroup extends ORM {
 			'list_flag' => FALSE,
 			'edit_flag' => TRUE,
 			'search_flag' => FALSE,
-			'view_flag' => TRUE,
+			'view_flag' => FALSE,
+			'is_nullable' => FALSE,
 		),
 		'user_id' => array(
 			'field_type' => 'select',
@@ -42,6 +43,7 @@ class Model_cl4_UserGroup extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 			'field_options' => array(
 				'source' => array(
 					'source' => 'sql',
@@ -56,6 +58,7 @@ class Model_cl4_UserGroup extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 			'field_options' => array(
 				'source' => array(
 					'source' => 'sql',

@@ -40,7 +40,8 @@ class Model_cl4_Group extends ORM {
 			'list_flag' => FALSE,
 			'edit_flag' => TRUE,
 			'search_flag' => FALSE,
-			'view_flag' => TRUE,
+			'view_flag' => FALSE,
+			'is_nullable' => FALSE,
 		),
 		'name' => array(
 			'field_type' => 'text',
@@ -49,6 +50,7 @@ class Model_cl4_Group extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 		'description' => array(
 			'field_type' => 'textarea',
@@ -57,6 +59,7 @@ class Model_cl4_Group extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 	);
 

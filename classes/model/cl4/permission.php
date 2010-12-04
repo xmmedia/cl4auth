@@ -43,8 +43,9 @@ class Model_cl4_Permission extends ORM {
 			'display_order' => 10,
 			'list_flag' => FALSE,
 			'edit_flag' => TRUE,
+			'view_flag' => FALSE,
 			'search_flag' => FALSE,
-			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 		'permission' => array(
 			'field_type' => 'text',
@@ -53,6 +54,7 @@ class Model_cl4_Permission extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 		'name' => array(
 			'field_type' => 'text',
@@ -61,6 +63,7 @@ class Model_cl4_Permission extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 		'description' => array(
 			'field_type' => 'textarea',
@@ -69,6 +72,7 @@ class Model_cl4_Permission extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
+			'is_nullable' => FALSE,
 		),
 	);
 
