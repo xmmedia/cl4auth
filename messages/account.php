@@ -30,4 +30,7 @@ return array(
 	'password_email_error' => 'There was a problem resetting your password. The administrators have been notified.',
 	'password_email_username_not_found' => 'The username could not be found. Please try copying and pasting the link from the email or contacting the administrator.',
 	'password_email_partial' => 'Only partial information was received to reset your password. Please try copying and pasting the link from the email or contacting the administrator.',
+    
+    // reCAPTCHA isn't valid'
+    'recaptcha_not_valid' => 'reCAPTCHA answer was not correct.  Please try again.'
 );
