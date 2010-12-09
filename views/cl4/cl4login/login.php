@@ -9,7 +9,7 @@
 	<ul class="cl4_form">
 		<li>
 			<ul>
-				<li class="field_label" style="width:400px;"><label for="username">Email Address / Username</label></li>
+				<li class="field_label" style=""><label for="username">Email Address / Username</label></li>
 				<li class="field_value"><?php echo Form::input('username', $username, array('size' => 20, 'maxlength' => 100, 'id' => 'username')); ?></li>
 			</ul>
 		</li>
@@ -21,9 +21,10 @@
 		</li>
 	</ul>
 
-	<?php if ($add_captcha): ?>
+	<?php if ($add_captcha) { ?>
+		<p>Enter the correct username and password above and then type the characters you see in the picture below.</p>
 		<?php echo recaptcha_get_html(RECAPTCHA_PUBLIC_KEY); ?>
-	<?php endif; ?>
+	<?php } ?>
 
 	<?php
 	echo Form::submit(NULL, 'Login', array('class' => 'login_button'));

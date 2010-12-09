@@ -7,9 +7,6 @@ class Controller_cl4_Login extends Controller_Base {
 	* View: Login form.
 	*/
 	public function action_index() {
-		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
-		$session = Session::instance();
-
 		// set the template title (see Controller_App for implementation)
 		$this->template->page_title = 'Login';
 
@@ -19,44 +16,60 @@ class Controller_cl4_Login extends Controller_Base {
 			$this->login_success_redirect();
 		}
 
+		// get some variables from the request
 		$timed_out = cl4::get_param('timed_out');
 		$redirect = cl4::get_param('redirect', '');
 
+		// repare the view
 		$login_view = View::factory('cl4/cl4login/login')
 			->set('redirect', $redirect);
 
-		// Get number of login attempts this session
-		$attempts = $session->get('login_attempts', 0);
+		$login_config = Kohana::config('cl4login');
 
-		// If more than three login attempts, add Captcha to form
-		$login_view->set('add_captcha', $attempts > 3);
+		// Get number of login attempts this session
+		$attempts = Arr::path($this->session, $login_config['session_key'] . '.attempts', 0);
+		$force_captcha = Arr::get($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
+
+		// Update number of login attempts
+		++$attempts;
+		// If more than three login attempts, add a captcha to form
+		$captcha_required = ($force_captcha || $attempts > $login_config['failed_login_captcha_display']);
+		$this->session[$login_config['session_key']]['attempts'] = $attempts;
+		$login_view->set('add_captcha', $captcha_required);
+
+		// load the recaptcha library
+		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
 
 		// put the post in another var so we don't change it to a validate object in login()
 		$validate = $_POST;
 
 		// $_POST is not empty
 		if ( ! empty($validate)) {
-			// If recaptcha was set
-			if (isset($validate['recaptcha_challenge_field'])) {
+			// If recaptcha was set and is required
+			$captcha_valid = FALSE;
+			if ($captcha_required && isset($validate['recaptcha_challenge_field']) && isset($validate['recaptcha_response_field'])) {
 				// Test if recaptcha is valid
-				$resp = recaptcha_check_answer(
-					RECAPTCHA_PRIVATE_KEY,
-					$_SERVER['REMOTE_ADDR'],
-					$validate['recaptcha_challenge_field'],
-					$validate['recaptcha_response_field']
-				);
-			}
+				$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $validate['recaptcha_challenge_field'], $validate['recaptcha_response_field']);
+				$captcha_valid = $resp->is_valid;
+			} // if
 
-			// If recaptcha was not set or recaptcha is valid
-			if (( ! isset($_POST['recaptcha_challenge_field'])) || ($resp->is_valid)) {
-				// Instantiate a new user
-				$user = ORM::factory('user');
+			// Instantiate a new user
+			$user = ORM::factory('user');
 
-				// Check Auth
-				// more specifically, username and password fields need to be set.
-				// If the post data validates using the rules setup in the user model
-				// $validate is passed by reference and becomes a validate object inside login()
-				if ($user->login($validate)) {
+			// Check Auth
+			// more specifically, username and password fields need to be set.
+			// If the post data validates using the rules setup in the user model
+			// $validate is passed by reference and becomes a Validate object inside login()
+			if ($user->login($validate) && ( ! $captcha_required || ($captcha_required && $captcha_valid))) {
+				// if the account has more than 5 login attempts and the captcha in invalid (or not received) then go back to the login page and force them to enter a captcha
+				if (($user->_failed_login_count > $login_config['max_failed_login_count'] && ! $captcha_valid) || ($force_captcha && ! $captcha_valid)) {
+					// log out the user because they need to verified as human first
+					//Auth::instance()->get_user()->logout();
+					$this->session[$login_config['session_key']]['force_captcha'] = TRUE;
+					$captcha_required = TRUE;
+
+				// login is all good, check for redirect
+				} else {
 					if ( ! empty($redirect) && is_string($redirect)) {
 						// Redirect after a successful login, but check permissions first
 						$redirect_request = Request::factory($redirect);
@@ -73,34 +86,36 @@ class Controller_cl4_Login extends Controller_Base {
 						// redirect to the user account
 						$this->login_success_redirect();
 					}
-				// If login failed
-				} else {
-					// Get errors for display in view and set the username and password to populate the fields (makes it easier for the user)
-					Message::add(Message::add_validate_errors($validate, 'user'), Message::$error);
-					$login_view->set('username', $validate['username']);
-					$login_view->set('password', $validate['password']);
+				} // if
 
-					// Update number of failed login attempts
-					$attempts++;
-					$session->set('login_attempts', $attempts);
-					$login_view->set('add_captcha', $attempts > 3);
-				}
-			// If recaptcha was not valid
+			// If login failed (captcha and/or wrong credentials)
 			} else {
-				Message::add(__(Kohana::message('account', 'recaptcha_not_valid')), Message::$warning);
-				$login_view->set('username', $validate['username']);
-				$login_view->set('password', $validate['password']);
-			}
-		// If $_POST is empty
-		} else {
-			$login_view->set('username', '');
-			$login_view->set('password', '');
-		}
+				// determine if we should be displaying a recaptcha message
+				if ( ! $captcha_valid) {
+					$additional_messages = array(__(Kohana::message('user', 'recaptcha_not_valid')));
+				} else {
+					$additional_messages = array();
+				}
+				// Get errors for display in view and set the username and password to populate the fields (makes it easier for the user)
+				Message::add(Message::add_validate_errors($validate, 'user', $additional_messages), Message::$error);
+
+				// determine if we have to display the captcha because the account they attempted to access has too many attempts
+				if ($user->loaded() && $user->too_many_login_attempts()) {
+					$this->session[$login_config['session_key']]['force_captcha'] = TRUE;
+					$captcha_required = TRUE;
+				}
+			} // if
+		} // if $validate
 
 		if ( ! empty($timed_out)) {
 			// they have come from the timeout page, so send them back there
 			Request::instance()->redirect('login/timedout' . $this->get_redirect_query());
 		}
+
+		// set the user name and password in the view so the fields can be populated (makes logging in easier)
+		$login_view->set('username', ( ! empty($validate['username']) ? $validate['username'] : ''));
+		$login_view->set('password', ( ! empty($validate['password']) ? $validate['password'] : ''));
+		$login_view->set('add_captcha', $captcha_required);
 
 		$this->template->body_html = $login_view;
 
@@ -135,12 +150,19 @@ class Controller_cl4_Login extends Controller_Base {
 
 				Message::add(__(Kohana::message('user', 'username.logged_out')), Message::$notice);
 			}
+
+			// redirect to the user account and then the signin page if logout worked as expected
+			Request::instance()->redirect('login' . $this->get_redirect_query());
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
-		}
+			Message::add(__(Kohana::message('user', 'username.not_logged_out')), Message::$error);
 
-		// redirect to the user account and then the signin page if logout worked as expected
-		Request::instance()->redirect('login' . $this->get_redirect_query());
+			if ( ! cl4::is_dev()) {
+				// redirect them to the default page
+				$default_redirect = Kohana::config('auth.default_login_redirect');
+				Request::instance()->redirect($default_redirect);
+			}
+		}
 	} // function
 
 	/**

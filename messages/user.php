@@ -8,13 +8,14 @@
 return array(
 	'username' => array(
 		'not_empty' => ':field must not be empty.',
-		'invalid' => ':field or password is incorrect.',
-		'email' => ':field mst be an email address.',
+		'invalid' => 'Your :field or password is incorrect.',
+		'email' => ':field must be an email address.',
 		'min_length' => ':field must be an email address.',
 		'max_length' => ':field must be an email address.',
 		'username_available' => 'The username/email address entered is already used. Please use a different email address.',
 		'too_many_attempts' => 'There have been too many attempts on this account. The account will be locked for 5 minutes.',
 		'logged_out' => 'You have been logged out successfully.',
+		'not_logged_out' => 'There was a problem logging out.',
 	),
 	'password' => array(
 		'not_empty' => ':field must not be empty.',
@@ -22,4 +23,5 @@ return array(
 		'max_length' => ':field must be less than :param1 characters long.',
 		'password_matches' => 'Your passwords need to both be the same.',
 	),
+	'recaptcha_not_valid' => 'The reCAPTCHA wasn\'t entered correctly. Please try again.',
 );

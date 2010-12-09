@@ -271,6 +271,38 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	} // function _login
 
 	/**
+	* Checks to see if the stored password and the passed password are the same
+	* Any of the automatic query stuff that is applied when find() is run on the user model will also be applied here
+	*
+	* @param  ORM  $user  The user model or the username
+	* @param  string  $password  The password to compare against
+	* @return  boolean
+	*/
+	public function compare_password($user, $password) {
+		if (empty($password)) {
+			return FALSE;
+		}
+
+		if ( ! is_object($user)) {
+			$username = $user;
+
+			// Load the user
+			$user = ORM::factory('user');
+			$user->where($user->unique_key($username), '=', $username)->find();
+		}
+
+		if ($user->loaded() && is_string($password)) {
+			// Get the salt from the stored password
+			$salt = $this->find_salt($this->password($user));
+
+			// Create a hashed password using the salt from the stored password
+			$password = $this->hash_password($password, $salt);
+		}
+
+		return ($user->loaded() && $user->password == $password);
+	}
+
+	/**
 	* Generates a random password without any special characters (only alpha numeric) $length characters long
 	* Won't include characters i L O 0 (zero) 1 (one) q to avoid confusion
 	*

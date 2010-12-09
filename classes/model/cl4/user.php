@@ -43,7 +43,7 @@ class Model_cl4_User extends Model_Auth_User {
 	// column labels
 	protected $_labels = array(
 		'id' => 'ID',
-		'date_expired' => 'Date Expired',
+		'expiry_date' => 'Date Expired',
 		'username' => 'Email (Username)',
 		'password' => 'Password',
 		'password_confirm' => 'Password Confirm',
@@ -74,7 +74,7 @@ class Model_cl4_User extends Model_Auth_User {
 		'expiry_date' => array(
 			'field_type' => 'datetime',
 			'list_flag' => FALSE,
-			'edit_flag' => TRUE,
+			'edit_flag' => FALSE,
 			'search_flag' => FALSE,
 			'view_flag' => FALSE,
 			'is_nullable' => FALSE,
@@ -149,7 +149,7 @@ class Model_cl4_User extends Model_Auth_User {
 		'failed_login_count' => array(
 			'field_type' => 'text',
 			'list_flag' => TRUE,
-			'edit_flag' => FALSE,
+			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'display_order' => 100,
@@ -177,25 +177,36 @@ class Model_cl4_User extends Model_Auth_User {
 
 	// relationships
 	protected $_has_many = array(
-		'user_token' => array('model' => 'user_token'), // todo: source model shouldn't be needed
-		'group'      => array('model' => 'group', 'through' => 'user_group', 'foreign_key' => 'user_id'),
-		'auth_log'   => array('model' => 'authlog', 'through' => 'auth_log', 'foreign_key' => 'user_id', 'far_key' => 'id'),
+		'user_token' => array(
+			'model'       => 'user_token',
+			'foreign_key' => 'user_id',
+		),
+		'group' => array(
+			'model'       => 'group',
+			'foreign_key' => 'user_id'
+		),
+		'auth_log' => array(
+			'model'       => 'authlog',
+			'foreign_key' => 'user_id',
+			'through'     => 'auth_log',
+			'far_key'     => 'id',
+		),
 	);
-	protected $_has_one = array();
-
-	// Columns to ignore
-	protected $_ignored_columns = array('password_confirm');
 
 	protected $_expires_column = array(
 		'column' 	=> 'expiry_date',
 		'default'	=> 0,
 	);
 
+	// Stores the failed login count before a login attempt. Set in login()
+	public $_failed_login_count;
+
 	/**
 	* Validates login information from an array, and optionally redirects
 	* after a successful login.
 	*
-	* @param   array    values to check (passed by reference)
+	* @param   array    $login_details    values to check (passed by reference)
+	* @param   string   $redirect         not used: the page to redirect to
 	* @return  boolean
 	*/
 	public function login(array & $login_details, $redirect = FALSE) {
@@ -219,28 +230,34 @@ class Model_cl4_User extends Model_Auth_User {
 			$this->add_login_where($login_details['username'])
 				->find();
 
+			$this->_failed_login_count = $this->failed_login_count;
+
 			// if there are too many recent failed logins, fail now
-			if ($this->_loaded && $this->failed_login_count > 5 && strtotime($this->last_failed_login) > strtotime('-5 minutes') ) {
+			if ($this->_loaded && $this->too_many_login_attempts()) {
 				// fail (too many failed logins within 5 minutes).
 				$this->failed_login_count = DB::expr('failed_login_count + 1');
 				$this->last_failed_login = DB::expr('NOW()');
-				$this->save();
+				// save and then retrieve the record so the object is updated with the failed count and date
+				$this->save()
+					->find();
 
 				$login_details->error('username', 'too_many_attempts');
 				$auth_type = $auth_types['too_many_attempts'];
 
 			} else {
-				if ($this->_loaded && Auth::instance()->login($this, $login_details['password'], $remember)) {
+				if ($this->_loaded && Auth::instance()->compare_password($this, $login_details['password']) && Auth::instance()->login($this, $login_details['password'], $remember)) {
 					// Login is successful
 					$status = TRUE;
 					$auth_type = $auth_types['logged_in'];
 				} else {
 					// there was a problem logging them in, but set failed counts and date/time or set type to unknown username/password if user doesn't exist
-					if ($this->_loaded && is_numeric($this->id) && $this->id != 0) {
+					if ($this->_loaded) {
 						// only save if the user exists
 						$this->failed_login_count = DB::expr('failed_login_count + 1');
 						$this->last_failed_login = DB::expr('NOW()');
-						$this->save();
+						// save and then retrieve the record so the object is updated with the failed count and date
+						$this->save()
+							->find();
 
 						$auth_type = $auth_types['invalid_password'];
 					} else {
@@ -253,32 +270,57 @@ class Model_cl4_User extends Model_Auth_User {
 			} // if
 		} else {
 			$auth_type = $auth_types['invalid_username_password'];
+
+			$this->add_login_where($login_details['username'])
+				->find();
 		} // if
 
-		if ($this->_loaded) {
-			$this->add('auth_log', ORM::factory('authlog'), array(
-				'username' => $this->username,
-				'access_time' => DB::expr('NOW()'),
-				'auth_type_id' => $auth_type,
-				'browser' => ! empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
-				'ip_address' => ! empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '',
-			));
-		} else {
-			// the user is not valid, so the object doesn't contain an information and screws up because it can't set the user_id
-			DB::insert('auth_log')
-				->columns(array('username', 'access_time', 'auth_type_id', 'browser', 'ip_address'))
-				->values(array(
-					$login_details['username'],
-					DB::expr('NOW()'),
-					'auth_type_id' => $auth_type,
-					'browser' => ! empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
-					'ip_address' => ! empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '',
-				))
-				->execute($this->_db);
-		}
+		$this->add_auth_log($auth_type, $login_details['username']);
 
 		return $status;
 	} // function login
+
+	/**
+	* Add an auth log
+	* If the model is loaded, it will use the relationship to the model
+	* If the model is not loaded, it will create a new authlog model
+	*
+	* @param   int    $auth_type  The auth type id
+	* @param   mixed  $username   The username, if loaded, this will be replaced with the current model's username
+	* @return  ORM
+	*/
+	public function add_auth_log($auth_type, $username = NULL) {
+		$auth_log_data = array(
+			'username' => $username,
+			'access_time' => DB::expr("NOW()"),
+			'auth_type_id' => $auth_type,
+			'browser' => ( ! empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : ''),
+			'ip_address' => ( ! empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : ''),
+		);
+
+		if ($this->_loaded) {
+			$auth_log_data['username'] = $this->username;
+			$this->add('auth_log', ORM::factory('authlog'), $auth_log_data);
+		} else {
+			// the user is not valid, so the object doesn't contain an information and screws up because it can't set the user_id
+			$auth_log = ORM::factory('authlog')
+				->values($auth_log_data)
+				->save();
+		} // if
+
+		return $this;
+	} // function add_auth_log
+
+	/**
+	* Determine if the current user has too many login attempts in the 5 minutes
+	* Returns TRUE if they do, FALSE if they don't
+	*
+	* @return  bool
+	*/
+	public function too_many_login_attempts() {
+		$config = Kohana::config('cl4login');
+		return ($this->failed_login_count > $config['max_failed_login_count'] && strtotime($this->last_failed_login) > strtotime('-' . $config['failed_login_wait_time'] . ' minutes'));
+	}
 
 	/**
 	* Adds the where clause to the object for login checking
@@ -303,16 +345,10 @@ class Model_cl4_User extends Model_Auth_User {
 	public function logout() {
 		$auth_types = Kohana::config('cl4login.auth_type');
 
-		$this->add('auth_log', ORM::factory('authlog'), array(
-			'username' => $this->username,
-			'access_time' => DB::expr('NOW()'),
-			'auth_type_id' => $auth_types['logged_out'],
-			'browser' => ! empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '',
-			'ip_address' => ! empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '',
-		));
+		$this->add_auth_log($auth_types['logged_out']);
 
 		// Sign out the user
-		// The TRUE parameter triggers the logout to delete everything in the session
+		// Passing a TRUE parameter will trigger the logout to delete everything in the session
 		return Auth::instance()->logout();
 	} // function
 
