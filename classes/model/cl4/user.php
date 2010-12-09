@@ -202,14 +202,17 @@ class Model_cl4_User extends Model_Auth_User {
 	public $_failed_login_count;
 
 	/**
-	* Validates login information from an array, and optionally redirects
-	* after a successful login.
+	* Validates login information from the passed array. Includes checking for too many failed login attempts and recording of login attempts (successful or otherwise).
+	*
+	* ** Special case: if the user's credentials are good (username, password, active, not expired, etc) but they have too many logins
+	* (no check of time) and have not been verified as human, then the function will return TRUE, but they will not be logged in (the session key won't be set).
 	*
 	* @param   array    $login_details    values to check (passed by reference)
 	* @param   string   $redirect         not used: the page to redirect to
-	* @return  boolean
+	* @param   boolean  $verified_human   If a check (probably using a captcha) has been done to verify the user is a human
+	* @return  boolean  See special case in comments
 	*/
-	public function login(array & $login_details, $redirect = FALSE) {
+	public function login(array & $login_details, $redirect = FALSE, $verified_human = FALSE) {
 		$login_details = Validate::factory($login_details)
 			->label('username', $this->_labels['username'])
 			->label('password', $this->_labels['password'])
@@ -235,30 +238,36 @@ class Model_cl4_User extends Model_Auth_User {
 			// if there are too many recent failed logins, fail now
 			if ($this->_loaded && $this->too_many_login_attempts()) {
 				// fail (too many failed logins within 5 minutes).
-				$this->failed_login_count = DB::expr('failed_login_count + 1');
-				$this->last_failed_login = DB::expr('NOW()');
-				// save and then retrieve the record so the object is updated with the failed count and date
-				$this->save()
-					->find();
+				$this->increment_failed_login();
 
 				$login_details->error('username', 'too_many_attempts');
 				$auth_type = $auth_types['too_many_attempts'];
 
 			} else {
-				if ($this->_loaded && Auth::instance()->compare_password($this, $login_details['password']) && Auth::instance()->login($this, $login_details['password'], $remember)) {
-					// Login is successful
-					$status = TRUE;
-					$auth_type = $auth_types['logged_in'];
+				if ($this->_loaded && Auth::instance()->compare_password($this, $login_details['password'])) {
+					$login_config = Kohana::config('cl4login');
+					// check if they have attempted too many times (not matter the time frame) and haven't been verified as human (protection for bots)
+					// return true, as technically they have logged in, but the session key won't be set
+					if ( ! $verified_human && $this->failed_login_count > $login_config['max_failed_login_count']) {
+						$status = TRUE;
+						$auth_type = $auth_types['verifying_human'];
+
+					// verified as human and not too many fails, so try to fully login
+					} else if (Auth::instance()->login($this, $login_details['password'], $remember)) {
+						// Login is successful
+						$status = TRUE;
+						$auth_type = $auth_types['logged_in'];
+					} else {
+						$this->increment_failed_login();
+						$auth_type = $auth_types['invalid_password'];
+
+						// add a custom message found in message/login.php
+						$login_details->error('username', 'invalid');
+					}
 				} else {
 					// there was a problem logging them in, but set failed counts and date/time or set type to unknown username/password if user doesn't exist
 					if ($this->_loaded) {
-						// only save if the user exists
-						$this->failed_login_count = DB::expr('failed_login_count + 1');
-						$this->last_failed_login = DB::expr('NOW()');
-						// save and then retrieve the record so the object is updated with the failed count and date
-						$this->save()
-							->find();
-
+						$this->increment_failed_login();
 						$auth_type = $auth_types['invalid_password'];
 					} else {
 						$auth_type = $auth_types['invalid_username_password'];
@@ -279,6 +288,22 @@ class Model_cl4_User extends Model_Auth_User {
 
 		return $status;
 	} // function login
+
+	/**
+	* Increments the number of failed login attempts and sets the last failed attempt date/time.
+	* After saving, it retrieves the model again so we now have the new failed attempt count.
+	*
+	* @return  ORM
+	*/
+	public function increment_failed_login() {
+		$this->failed_login_count = DB::expr('failed_login_count + 1');
+		$this->last_failed_login = DB::expr('NOW()');
+		// save and then retrieve the record so the object is updated with the failed count and date
+		$this->save()
+			->find();
+
+		return $this;
+	} // function increment_failed_login
 
 	/**
 	* Add an auth log
@@ -318,8 +343,8 @@ class Model_cl4_User extends Model_Auth_User {
 	* @return  bool
 	*/
 	public function too_many_login_attempts() {
-		$config = Kohana::config('cl4login');
-		return ($this->failed_login_count > $config['max_failed_login_count'] && strtotime($this->last_failed_login) > strtotime('-' . $config['failed_login_wait_time'] . ' minutes'));
+		$login_config = Kohana::config('cl4login');
+		return ($this->failed_login_count > $login_config['max_failed_login_count'] && strtotime($this->last_failed_login) > strtotime('-' . $login_config['failed_login_wait_time'] . ' minutes'));
 	}
 
 	/**

@@ -43,7 +43,7 @@ class Controller_cl4_Login extends Controller_Base {
 		// put the post in another var so we don't change it to a validate object in login()
 		$validate = $_POST;
 
-		// $_POST is not empty
+		// $_POST/$validate is not empty
 		if ( ! empty($validate)) {
 			// If recaptcha was set and is required
 			$captcha_valid = FALSE;
@@ -60,11 +60,11 @@ class Controller_cl4_Login extends Controller_Base {
 			// more specifically, username and password fields need to be set.
 			// If the post data validates using the rules setup in the user model
 			// $validate is passed by reference and becomes a Validate object inside login()
-			if ($user->login($validate) && ( ! $captcha_required || ($captcha_required && $captcha_valid))) {
+			// if the captcha is required, then also make sure it's valid
+			if ($user->login($validate, FALSE, $captcha_valid) && ( ! $captcha_required || ($captcha_required && $captcha_valid))) {
 				// if the account has more than 5 login attempts and the captcha in invalid (or not received) then go back to the login page and force them to enter a captcha
-				if (($user->_failed_login_count > $login_config['max_failed_login_count'] && ! $captcha_valid) || ($force_captcha && ! $captcha_valid)) {
+				if ($user->_failed_login_count > $login_config['max_failed_login_count'] && ! $captcha_valid) {
 					// log out the user because they need to verified as human first
-					//Auth::instance()->get_user()->logout();
 					$this->session[$login_config['session_key']]['force_captcha'] = TRUE;
 					$captcha_required = TRUE;
 

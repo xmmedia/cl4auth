@@ -336,12 +336,16 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	* Add any session setting that is needed after the user logs in here
 	* The User Model is already stored in the session
 	* parent::complete_login() should always be called after (or before) as this puts the user model in the session
+	* Removes the login session key
 	*
 	* @param   object  user ORM object
 	* @return  void
 	*/
 	protected function complete_login($user) {
 		$this->update_timestamp();
+
+		// delete the session key that contains # of attempts and forced captcha
+		Session::instance()->delete(Kohana::config('cl4login.session_key'));
 
 		return parent::complete_login($user);
 	} // function

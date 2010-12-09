@@ -16,5 +16,6 @@ return array(
 		'invalid_username_password' => 4,
 		'unknown_error' => 5,
 		'too_many_attempts' => 6,
+		'verifying_human' => 7,
 	),
 );
