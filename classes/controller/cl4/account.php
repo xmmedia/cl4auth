@@ -206,59 +206,57 @@ class Controller_cl4_Account extends Controller_Base {
 		$this->template->page_title = 'Forgot Password';
 
 		if (isset($_POST['reset_username'])) {
-			// If recaptcha is valid
-			$resp = recaptcha_check_answer(
-				RECAPTCHA_PRIVATE_KEY,
-				$_SERVER['REMOTE_ADDR'],
-				$_POST['recaptcha_challenge_field'],
-				$_POST['recaptcha_response_field']
-			);
-			if ($resp->is_valid) {
-				$user = ORM::factory('user')->where('username', '=', $_POST['reset_username'])->find();
+			// If recaptcha is valid and is received
+			$captcha_received = FALSE;
+			if (isset($_POST['recaptcha_challenge_field']) && isset($_POST['recaptcha_response_field'])) {
+				$captcha_received = TRUE;
+				$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
+			}
 
-				// Admin passwords cannot be reset by email
-				if (is_numeric($user->id) && ! in_array($user->username, $default_options['admin_accounts'])) {
-					// send an email with the account reset token
-					$user->reset_token = cl4_Auth::generate_password(32);
-					$user->save();
+			$user = ORM::factory('user')->where('username', '=', $_POST['reset_username'])
+				->find();
 
-					try {
-						$mail = new Mail();
-						$mail->IsHTML();
-						$mail->add_user($user->id);
-						$mail->Subject = LONG_NAME . ' Password Reset';
+			// Admin passwords cannot be reset by email
+			if ($captcha_received && $resp->is_valid && $user->_loaded && ! in_array($user->username, $default_options['admin_accounts'])) {
+				// send an email with the account reset token
+				$user->reset_token = cl4_Auth::generate_password(32);
+				$user->save();
 
-						$url = 'account/reset?' . http_build_query(array(
-							'username' => $user->username,
-							'reset_token' => $user->reset_token,
-						), '', '&');
-						$link = HTML::anchor($url, 'click here', array('target' => '_blank'));
+				try {
+					$mail = new Mail();
+					$mail->IsHTML();
+					$mail->add_user($user->id);
+					$mail->Subject = LONG_NAME . ' Password Reset';
 
-						$mail->Body = View::factory('cl4/cl4account/forgot_link')
-							->set('app_name', LONG_NAME)
-							->set('url', $url)
-							->set('link', $link)
-							->set('admin_email', ADMIN_EMAIL);
+					$url = 'account/reset?' . http_build_query(array(
+						'username' => $user->username,
+						'reset_token' => $user->reset_token,
+					), '', '&');
+					$link = HTML::anchor($url, 'click here', array('target' => '_blank'));
 
-						$mail->Send();
+					$mail->Body = View::factory('cl4/cl4account/forgot_link')
+						->set('app_name', LONG_NAME)
+						->set('url', $url)
+						->set('link', $link)
+						->set('admin_email', ADMIN_EMAIL);
 
-						Message::add(__(Kohana::message('account', 'reset_link_sent')), Message::$notice);
-					} catch (Exception $e) {
-						Message::add(__(Kohana::message('account', 'forgot_send_error')), Message::$error);
-						throw $e;
-					}
-				} else if (in_array($user->username, $default_options['admin_accounts'])) {
-					Message::add(__(Kohana::message('account', 'reset_admin_account')), Message::$warning);
+					$mail->Send();
 
-				} else {
-					Message::add(__(Kohana::message('account', 'reset_not_found')), Message::$warning);
+					Message::add(__(Kohana::message('account', 'reset_link_sent')), Message::$notice);
+				} catch (Exception $e) {
+					Message::add(__(Kohana::message('account', 'forgot_send_error')), Message::$error);
+					throw $e;
+				}
+			} else if (in_array($user->username, $default_options['admin_accounts'])) {
+				Message::add(__(Kohana::message('account', 'reset_admin_account')), Message::$warning);
+
+			} else {
+				Message::add(__(Kohana::message('account', 'reset_not_found')), Message::$warning);
+				if ( ! $captcha_received || ! $resp->is_valid) {
+					Message::add(__(Kohana::message('user', 'recaptcha_not_valid')), Message::$warning);
 				}
 			}
-			// If reCAPTCHA is not valid
-			else {
-				Message::add(__(Kohana::message('account', 'recaptcha_not_valid')), Message::$warning);
-			}
-		}
+		} // if post
 
 		$this->template->body_html = View::factory('cl4/cl4account/forgot');
 	} // function
