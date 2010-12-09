@@ -439,10 +439,8 @@ class Model_cl4_User extends Model_Auth_User {
 				}
 			}
 
-		} else {
-			if (isset($this->_changed[$field])) {
-				unset($this->_changed[$field]);
-			}
+		} else if (isset($this->_changed[$field])) {
+			unset($this->_changed[$field]);
 		}
 	} // function check_password
 } // class
