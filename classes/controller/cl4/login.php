@@ -9,31 +9,31 @@ class Controller_cl4_Login extends Controller_Base {
 	public function action_index() {
 		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
 		$session = Session::instance();
-		
+
 		// set the template title (see Controller_App for implementation)
 		$this->template->page_title = 'Login';
-		
+
 		// If user already signed-in
 		if (Auth::instance()->logged_in() === TRUE){
 			// redirect to the user account
 			$this->login_success_redirect();
 		}
-		
+
 		$timed_out = cl4::get_param('timed_out');
 		$redirect = cl4::get_param('redirect', '');
-		
+
 		$login_view = View::factory('cl4/cl4login/login')
 			->set('redirect', $redirect);
-		
+
 		// Get number of login attempts this session
 		$attempts = $session->get('login_attempts', 0);
-		
+
 		// If more than three login attempts, add Captcha to form
 		$login_view->set('add_captcha', $attempts > 3);
-		
+
 		// put the post in another var so we don't change it to a validate object in login()
 		$validate = $_POST;
-		
+
 		// $_POST is not empty
 		if ( ! empty($validate)) {
 			// If recaptcha was set
@@ -46,12 +46,12 @@ class Controller_cl4_Login extends Controller_Base {
 					$validate['recaptcha_response_field']
 				);
 			}
-			
+
 			// If recaptcha was not set or recaptcha is valid
 			if (( ! isset($_POST['recaptcha_challenge_field'])) || ($resp->is_valid)) {
 				// Instantiate a new user
 				$user = ORM::factory('user');
-				
+
 				// Check Auth
 				// more specifically, username and password fields need to be set.
 				// If the post data validates using the rules setup in the user model
@@ -79,7 +79,7 @@ class Controller_cl4_Login extends Controller_Base {
 					Message::add(Message::add_validate_errors($validate, 'user'), Message::$error);
 					$login_view->set('username', $validate['username']);
 					$login_view->set('password', $validate['password']);
-					
+
 					// Update number of failed login attempts
 					$attempts++;
 					$session->set('login_attempts', $attempts);
@@ -96,14 +96,14 @@ class Controller_cl4_Login extends Controller_Base {
 			$login_view->set('username', '');
 			$login_view->set('password', '');
 		}
-		
+
 		if ( ! empty($timed_out)) {
 			// they have come from the timeout page, so send them back there
 			Request::instance()->redirect('login/timedout' . $this->get_redirect_query());
 		}
-		
+
 		$this->template->body_html = $login_view;
-		
+
 		$this->template->on_load_js .= "\n$('#username').focus();\n";
 	} // function
 

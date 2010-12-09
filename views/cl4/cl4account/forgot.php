@@ -6,6 +6,6 @@
 
 echo Form::open('account/forgot');
 echo '<p>To start, enter email address: ' . Form::input('reset_username') . '</p>';
-echo recaptcha_get_html(RECAPTCHA_PUBLIC_KEY); 
+echo recaptcha_get_html(RECAPTCHA_PUBLIC_KEY);
 echo Form::submit(NULL, 'Reset Password');
 echo Form::close();

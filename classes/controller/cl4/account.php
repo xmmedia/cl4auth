@@ -199,7 +199,7 @@ class Controller_cl4_Account extends Controller_Base {
 	*/
 	public function action_forgot() {
 		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
-		
+
 		$default_options = Kohana::config('cl4account');
 
 		// set the template page_title (see Controller_Base for implementation)
@@ -215,33 +215,33 @@ class Controller_cl4_Account extends Controller_Base {
 			);
 			if ($resp->is_valid) {
 				$user = ORM::factory('user')->where('username', '=', $_POST['reset_username'])->find();
-				
+
 				// Admin passwords cannot be reset by email
 				if (is_numeric($user->id) && ! in_array($user->username, $default_options['admin_accounts'])) {
 					// send an email with the account reset token
 					$user->reset_token = cl4_Auth::generate_password(32);
 					$user->save();
-					
+
 					try {
 						$mail = new Mail();
 						$mail->IsHTML();
 						$mail->add_user($user->id);
 						$mail->Subject = LONG_NAME . ' Password Reset';
-						
+
 						$url = 'account/reset?' . http_build_query(array(
 							'username' => $user->username,
 							'reset_token' => $user->reset_token,
 						), '', '&');
 						$link = HTML::anchor($url, 'click here', array('target' => '_blank'));
-						
+
 						$mail->Body = View::factory('cl4/cl4account/forgot_link')
 							->set('app_name', LONG_NAME)
 							->set('url', $url)
 							->set('link', $link)
 							->set('admin_email', ADMIN_EMAIL);
-						
+
 						$mail->Send();
-						
+
 						Message::add(__(Kohana::message('account', 'reset_link_sent')), Message::$notice);
 					} catch (Exception $e) {
 						Message::add(__(Kohana::message('account', 'forgot_send_error')), Message::$error);
@@ -249,7 +249,7 @@ class Controller_cl4_Account extends Controller_Base {
 					}
 				} else if (in_array($user->username, $default_options['admin_accounts'])) {
 					Message::add(__(Kohana::message('account', 'reset_admin_account')), Message::$warning);
-					
+
 				} else {
 					Message::add(__(Kohana::message('account', 'reset_not_found')), Message::$warning);
 				}

@@ -29,7 +29,7 @@
 	echo Form::submit(NULL, 'Login', array('class' => 'login_button'));
 	echo Form::close();
 	?>
-	
+
 	<div class="forgot_link"><?php echo HTML::anchor('account/forgot', 'Forgot your password?') ?></div>
 	<div class="clear"></div>
 </div>
