@@ -19,6 +19,10 @@ class Model_cl4_AuthLog extends ORM {
 		'ip_address' => 'IP Address',
 	);
 
+	protected $_sorting = array(
+		'access_time' => 'DESC',
+	);
+
 	// column definitions
 	protected $_table_columns = array(
 		/**
