@@ -119,7 +119,7 @@ class Controller_cl4_Login extends Controller_Base {
 
 		$this->template->body_html = $login_view;
 
-		$this->template->on_load_js .= "\n$('#username').focus();\n";
+		$this->add_on_load_js("\$('#username').focus();");
 	} // function
 
 	/**
