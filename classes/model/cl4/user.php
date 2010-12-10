@@ -46,7 +46,7 @@ class Model_cl4_User extends Model_Auth_User {
 		'expiry_date' => 'Date Expired',
 		'username' => 'Email (Username)',
 		'password' => 'Password',
-		'password_confirm' => 'Password Confirm',
+		'password_confirm' => 'Confirm Password',
 		'first_name' => 'First Name',
 		'last_name' => 'Last Name',
 		'active_flag' => 'Active',
@@ -90,7 +90,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'is_nullable' => FALSE,
 		),
 		'password' => array(
-			'field_type' => 'password_confirm',
+			'field_type' => 'password',
 			'list_flag' => FALSE,
 			'edit_flag' => TRUE,
 			'search_flag' => FALSE,
