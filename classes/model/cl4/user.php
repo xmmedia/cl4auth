@@ -42,19 +42,21 @@ class Model_cl4_User extends Model_Auth_User {
 
 	// column labels
 	protected $_labels = array(
-		'id' 					=> 'ID',
-		'expiry_date' 			=> 'Date Expired',
-		'username' 				=> 'Email (Username)',
-		'password' 				=> 'Password',
-		'password_confirm' 		=> 'Confirm Password',
-		'first_name' 			=> 'First Name',
-		'last_name' 			=> 'Last Name',
-		'active_flag' 			=> 'Active',
-		'login_count' 			=> 'Login Count',
-		'last_login' 			=> 'Last Login',
-		'failed_login_count' 	=> 'Failed Login Count',
-		'last_failed_login' 	=> 'Last Failed Login',
-		'reset_token' 			=> 'Reset Password Token',
+		'id' 							=> 'ID',
+		'expiry_date' 					=> 'Date Expired',
+		'username' 						=> 'Email (Username)',
+		'password' 						=> 'Password',
+		'password_confirm' 				=> 'Confirm Password',
+		'first_name' 					=> 'First Name',
+		'last_name' 					=> 'Last Name',
+		'active_flag' 					=> 'Active',
+		'login_count' 					=> 'Login Count',
+		'last_login' 					=> 'Last Login',
+		'failed_login_count' 			=> 'Failed Login Count',
+		'last_failed_login' 			=> 'Last Failed Login',
+		'reset_token' 					=> 'Reset Password Token',
+		'force_update_password_flag'	=> 'Force Password Update',
+		'force_update_profile_flag'		=> 'Force Profile Update',
 	);
 
 	protected $_table_columns = array(
@@ -173,20 +175,20 @@ class Model_cl4_User extends Model_Auth_User {
 			'display_order' => 120,
 			'is_nullable' 	=> FALSE,
 		),
-		'updated_password_flag' => array(
-			'field_type'	=> 'hidden',
-			'list_flag'		=> FALSE,
+		'force_update_password_flag' => array(
+			'field_type'	=> 'checkbox',
+			'list_flag'		=> TRUE,
 			'edit_flag'		=> TRUE,
 			'search_flag'	=> FALSE,
-			'view_flag'		=> FALSE,
+			'view_flag'		=> TRUE,
 			'is_nullable'	=> FALSE,
 		),
-		'updated_profile_flag' => array(
-			'field_type'	=> 'hidden',
-			'list_flag'		=> FALSE,
+		'force_update_profile_flag' => array(
+			'field_type'	=> 'checkbox',
+			'list_flag'		=> TRUE,
 			'edit_flag'		=> TRUE,
 			'search_flag'	=> FALSE,
-			'view_flag'		=> FALSE,
+			'view_flag'		=> TRUE,
 			'is_nullable'	=> FALSE,
 		),
 	);
@@ -533,14 +535,14 @@ class Model_cl4_User extends Model_Auth_User {
 
 		// If the currently-logged in user is updating their own profile
 		if ($auth_user_id === $this->id) {
-			$this->updated_profile_flag = true;
+			$this->force_update_profile_flag = false;
 		}
 
 		// If password has been changed
 		if (array_key_exists('password', $this->_changed)) {
 			// If the currently-logged in user is updating their own password
 			if ($auth_user_id === $this->id) {
-				$this->updated_password_flag = true;
+				$this->force_update_password_flag = false;
 			}
 		}
 
