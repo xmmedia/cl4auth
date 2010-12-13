@@ -7,6 +7,9 @@ class Controller_cl4_Login extends Controller_Base {
 	* View: Login form.
 	*/
 	public function action_index() {
+		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
+		$session = Session::instance();
+
 		// set the template title (see Controller_App for implementation)
 		$this->template->page_title = 'Login';
 
@@ -37,12 +40,8 @@ class Controller_cl4_Login extends Controller_Base {
 		$this->session[$login_config['session_key']]['attempts'] = $attempts;
 		$login_view->set('add_captcha', $captcha_required);
 
-		// load the recaptcha library
-		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
-
 		// put the post in another var so we don't change it to a validate object in login()
 		$validate = $_POST;
-
 		// $_POST/$validate is not empty
 		if ( ! empty($validate)) {
 			// If recaptcha was set and is required
@@ -70,6 +69,24 @@ class Controller_cl4_Login extends Controller_Base {
 
 				// login is all good, check for redirect
 				} else {
+					// If user hasn't updated their profile
+					if ( ! $user->updated_profile) {
+						// Set message
+						Message::add(Kohana::message('account', 'update_profile'), Message::$warning);
+
+						// Set redirect
+						$redirect = "/account/profile";
+					}
+
+					// If user hasn't updated their password
+					if ( ! $user->updated_password) {
+						// Set message
+						Message::add(Kohana::message('account', 'update_password'), Message::$warning);
+
+						// Set redirect
+						$redirect = "/account/profile";
+					}
+
 					if ( ! empty($redirect) && is_string($redirect)) {
 						// Redirect after a successful login, but check permissions first
 						$redirect_request = Request::factory($redirect);
@@ -96,6 +113,7 @@ class Controller_cl4_Login extends Controller_Base {
 				} else {
 					$additional_messages = array();
 				}
+
 				// Get errors for display in view and set the username and password to populate the fields (makes it easier for the user)
 				Message::add(Message::add_validate_errors($validate, 'user', $additional_messages), Message::$error);
 

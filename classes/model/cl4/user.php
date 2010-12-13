@@ -42,19 +42,19 @@ class Model_cl4_User extends Model_Auth_User {
 
 	// column labels
 	protected $_labels = array(
-		'id' => 'ID',
-		'expiry_date' => 'Date Expired',
-		'username' => 'Email (Username)',
-		'password' => 'Password',
-		'password_confirm' => 'Confirm Password',
-		'first_name' => 'First Name',
-		'last_name' => 'Last Name',
-		'active_flag' => 'Active',
-		'login_count' => 'Login Count',
-		'last_login' => 'Last Login',
-		'failed_login_count' => 'Failed Login Count',
-		'last_failed_login' => 'Last Failed Login',
-		'reset_token' => 'Reset Password Token',
+		'id' 					=> 'ID',
+		'expiry_date' 			=> 'Date Expired',
+		'username' 				=> 'Email (Username)',
+		'password' 				=> 'Password',
+		'password_confirm' 		=> 'Confirm Password',
+		'first_name' 			=> 'First Name',
+		'last_name' 			=> 'Last Name',
+		'active_flag' 			=> 'Active',
+		'login_count' 			=> 'Login Count',
+		'last_login' 			=> 'Last Login',
+		'failed_login_count' 	=> 'Failed Login Count',
+		'last_failed_login' 	=> 'Last Failed Login',
+		'reset_token' 			=> 'Reset Password Token',
 	);
 
 	protected $_table_columns = array(
@@ -63,115 +63,131 @@ class Model_cl4_User extends Model_Auth_User {
 		* see the modules/cl4/config/cl4orm.php for a full list of cl4-specific options and documentation on what the options do
 		*/
 		'id' => array(
-			'field_type' => 'hidden',
-			'list_flag' => FALSE,
-			'edit_flag' => TRUE,
-			'search_flag' => FALSE,
-			'view_flag' => FALSE,
+			'field_type'	=> 'hidden',
+			'list_flag' 	=> FALSE,
+			'edit_flag' 	=> TRUE,
+			'search_flag'	=> FALSE,
+			'view_flag' 	=> FALSE,
 			'display_order' => 10,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'expiry_date' => array(
-			'field_type' => 'datetime',
-			'list_flag' => FALSE,
-			'edit_flag' => FALSE,
-			'search_flag' => FALSE,
-			'view_flag' => FALSE,
-			'is_nullable' => FALSE,
+			'field_type' 	=> 'datetime',
+			'list_flag' 	=> FALSE,
+			'edit_flag' 	=> FALSE,
+			'search_flag' 	=> FALSE,
+			'view_flag' 	=> FALSE,
+			'is_nullable' 	=> FALSE,
 			'display_order' => 20,
 		),
 		'username' => array(
-			'field_type' => 'text',
-			'list_flag' => TRUE,
-			'edit_flag' => TRUE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'text',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> TRUE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 30,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'password' => array(
-			'field_type' => 'password',
-			'list_flag' => FALSE,
-			'edit_flag' => TRUE,
-			'search_flag' => FALSE,
-			'view_flag' => FALSE,
+			'field_type' 	=> 'password',
+			'list_flag' 	=> FALSE,
+			'edit_flag' 	=> TRUE,
+			'search_flag' 	=> FALSE,
+			'view_flag' 	=> FALSE,
 			'display_order' => 40,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'first_name' => array(
-			'field_type' => 'text',
-			'list_flag' => TRUE,
-			'edit_flag' => TRUE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'text',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> TRUE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 50,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'last_name' => array(
-			'field_type' => 'text',
-			'list_flag' => TRUE,
-			'edit_flag' => TRUE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'text',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> TRUE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 60,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'active_flag' => array(
-			'field_type' => 'checkbox',
-			'list_flag' => TRUE,
-			'edit_flag' => TRUE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'checkbox',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> TRUE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 70,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 			'field_options' => array(
 				'default_value' => 1,
 			),
 		),
 		'login_count' => array(
-			'field_type' => 'text',
-			'list_flag' => TRUE,
-			'edit_flag' => FALSE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'text',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> FALSE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 80,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'last_login' => array(
-			'field_type' => 'datetime',
-			'list_flag' => TRUE,
-			'edit_flag' => FALSE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'datetime',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> FALSE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 90,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'failed_login_count' => array(
-			'field_type' => 'text',
-			'list_flag' => TRUE,
-			'edit_flag' => TRUE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'text',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> TRUE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 100,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'last_failed_login' => array(
-			'field_type' => 'datetime',
-			'list_flag' => TRUE,
-			'edit_flag' => FALSE,
-			'search_flag' => TRUE,
-			'view_flag' => TRUE,
+			'field_type' 	=> 'datetime',
+			'list_flag' 	=> TRUE,
+			'edit_flag' 	=> FALSE,
+			'search_flag' 	=> TRUE,
+			'view_flag' 	=> TRUE,
 			'display_order' => 110,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
 		),
 		'reset_token' => array(
-			'field_type' => 'text',
-			'list_flag' => FALSE,
-			'edit_flag' => FALSE,
-			'search_flag' => FALSE,
-			'view_flag' => FALSE,
+			'field_type' 	=> 'text',
+			'list_flag' 	=> FALSE,
+			'edit_flag' 	=> FALSE,
+			'search_flag' 	=> FALSE,
+			'view_flag' 	=> FALSE,
 			'display_order' => 120,
-			'is_nullable' => FALSE,
+			'is_nullable' 	=> FALSE,
+		),
+		'updated_password' => array(
+			'field_type'	=> 'hidden',
+			'list_flag'		=> FALSE,
+			'edit_flag'		=> TRUE,
+			'search_flag'	=> FALSE,
+			'view_flag'		=> FALSE,
+			'is_nullable'	=> FALSE,
+		),
+		'updated_profile' => array(
+			'field_type'	=> 'hidden',
+			'list_flag'		=> FALSE,
+			'edit_flag'		=> TRUE,
+			'search_flag'	=> FALSE,
+			'view_flag'		=> FALSE,
+			'is_nullable'	=> FALSE,
 		),
 	);
 
@@ -504,4 +520,30 @@ class Model_cl4_User extends Model_Auth_User {
 			unset($this->_changed[$field]);
 		}
 	} // function check_password
+
+	/**
+	 * Saves the current object.
+	 *
+	 * @return  ORM
+	 */
+	public function save() {
+		// Get the ID of the currently-logged in user
+		$auth_user = Session::instance()->get('auth_user');
+		$auth_user_id = isset($auth_user) ? $auth_user->id : null;
+
+		// If the currently-logged in user is updating their own profile
+		if ($auth_user_id === $this->id) {
+			$this->updated_profile = true;
+		}
+
+		// If password has been changed
+		if (array_key_exists('password', $this->_changed)) {
+			// If the currently-logged in user is updating their own password
+			if ($auth_user_id === $this->id) {
+				$this->updated_password = true;
+			}
+		}
+
+		return parent::save();
+	}
 } // class
