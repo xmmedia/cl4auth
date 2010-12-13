@@ -70,7 +70,7 @@ class Controller_cl4_Login extends Controller_Base {
 				// login is all good, check for redirect
 				} else {
 					// If user hasn't updated their profile
-					if ( ! $user->updated_profile) {
+					if ( ! $user->updated_profile_flag) {
 						// Set message
 						Message::add(Kohana::message('account', 'update_profile'), Message::$warning);
 
@@ -79,7 +79,7 @@ class Controller_cl4_Login extends Controller_Base {
 					}
 
 					// If user hasn't updated their password
-					if ( ! $user->updated_password) {
+					if ( ! $user->updated_password_flag) {
 						// Set message
 						Message::add(Kohana::message('account', 'update_password'), Message::$warning);
 

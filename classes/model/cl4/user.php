@@ -533,14 +533,14 @@ class Model_cl4_User extends Model_Auth_User {
 
 		// If the currently-logged in user is updating their own profile
 		if ($auth_user_id === $this->id) {
-			$this->updated_profile = true;
+			$this->updated_profile_flag = true;
 		}
 
 		// If password has been changed
 		if (array_key_exists('password', $this->_changed)) {
 			// If the currently-logged in user is updating their own password
 			if ($auth_user_id === $this->id) {
-				$this->updated_password = true;
+				$this->updated_password_flag = true;
 			}
 		}
 
