@@ -173,7 +173,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'display_order' => 120,
 			'is_nullable' 	=> FALSE,
 		),
-		'updated_password' => array(
+		'updated_password_flag' => array(
 			'field_type'	=> 'hidden',
 			'list_flag'		=> FALSE,
 			'edit_flag'		=> TRUE,
@@ -181,7 +181,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'view_flag'		=> FALSE,
 			'is_nullable'	=> FALSE,
 		),
-		'updated_profile' => array(
+		'updated_profile_flag' => array(
 			'field_type'	=> 'hidden',
 			'list_flag'		=> FALSE,
 			'edit_flag'		=> TRUE,
