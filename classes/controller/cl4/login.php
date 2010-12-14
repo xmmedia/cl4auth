@@ -7,9 +7,6 @@ class Controller_cl4_Login extends Controller_Base {
 	* View: Login form.
 	*/
 	public function action_index() {
-		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
-		$session = Session::instance();
-
 		// set the template title (see Controller_App for implementation)
 		$this->template->page_title = 'Login';
 
@@ -40,6 +37,11 @@ class Controller_cl4_Login extends Controller_Base {
 		$this->session[$login_config['session_key']]['attempts'] = $attempts;
 		$login_view->set('add_captcha', $captcha_required);
 
+		// load recaptcha
+		// do this here because there are likely to be a lot of accesses to this action that will never make it to here
+		// loading it here will save server time finding (searching) and loading recaptcha
+		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
+
 		// put the post in another var so we don't change it to a validate object in login()
 		$validate = $_POST;
 		// $_POST/$validate is not empty
@@ -69,23 +71,15 @@ class Controller_cl4_Login extends Controller_Base {
 
 				// login is all good, check for redirect
 				} else {
-					// If user hasn't updated their profile
-					if ($user->force_update_profile_flag) {
-						// Set message
-						Message::add(Kohana::message('account', 'update_profile'), Message::$warning);
+					// user has to update their profile or password
+					if ($user->force_update_profile_flag || $user->force_update_password_flag) {
+						// add a message for the user regarding updating their profile or password
+						$message_path = $user->force_update_profile_flag ? 'update_profile' : 'update_password';
+						Message::add(Kohana::message('account', $message_path), Message::$warning);
 
-						// Set redirect
-						$redirect = "/account/profile";
-					}
-
-					// If user hasn't updated their password
-					if ($user->force_update_password_flag) {
-						// Set message
-						Message::add(Kohana::message('account', 'update_password'), Message::$warning);
-
-						// Set redirect
-						$redirect = "/account/profile";
-					}
+						// instead of redirecting them to the location they requested, redirect them to the profile page
+						$redirect = '/account/profile';
+					} // if
 
 					if ( ! empty($redirect) && is_string($redirect)) {
 						// Redirect after a successful login, but check permissions first
