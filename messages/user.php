@@ -23,5 +23,7 @@ return array(
 		'max_length' => ':field must be less than :param1 characters long.',
 		'password_matches' => 'Your passwords need to both be the same.',
 	),
+	'update_profile' => 'Before continuing, please update your profile.',
+	'update_password' => 'Before continuing, please change your password.',
 	'recaptcha_not_valid' => 'The reCAPTCHA wasn\'t entered correctly. Please try again.',
 );

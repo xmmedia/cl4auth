@@ -75,7 +75,7 @@ class Controller_cl4_Login extends Controller_Base {
 					if ($user->force_update_profile_flag || $user->force_update_password_flag) {
 						// add a message for the user regarding updating their profile or password
 						$message_path = $user->force_update_profile_flag ? 'update_profile' : 'update_password';
-						Message::add(Kohana::message('account', $message_path), Message::$warning);
+						Message::add(Kohana::message('user', $message_path), Message::$notice);
 
 						// instead of redirecting them to the location they requested, redirect them to the profile page
 						$redirect = '/account/profile';
