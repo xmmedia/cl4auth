@@ -47,6 +47,8 @@ class Controller_cl4_Account extends Controller_Base {
 			// If the post data validates using the rules setup in the user model
 			if ($validate === TRUE) {
 				try {
+					// the user no longer is forced to update their profile
+					$mode->force_update_profile_flag = FALSE;
 					// save first, so that the model has an id when the relationships are added
 					$model->save();
 					// message: profile saved
@@ -98,6 +100,8 @@ class Controller_cl4_Account extends Controller_Base {
 				try {
 					ORM::factory('userpassword', $user->id)
 						->values(array('password' => $_POST['new_password']))
+						// user no longer needs to update their password
+						->values('force_update_password_flag', FALSE)
 						->save();
 
 					Message::add(__(Kohana::message('account', 'password_changed')), Message::$notice);
