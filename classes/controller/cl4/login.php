@@ -48,7 +48,9 @@ class Controller_cl4_Login extends Controller_Base {
 		if ( ! empty($validate)) {
 			// If recaptcha was set and is required
 			$captcha_valid = FALSE;
+			$captcha_received = FALSE;
 			if ($captcha_required && isset($validate['recaptcha_challenge_field']) && isset($validate['recaptcha_response_field'])) {
+				$captcha_received = TRUE;
 				// Test if recaptcha is valid
 				$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $validate['recaptcha_challenge_field'], $validate['recaptcha_response_field']);
 				$captcha_valid = $resp->is_valid;
@@ -102,7 +104,7 @@ class Controller_cl4_Login extends Controller_Base {
 			// If login failed (captcha and/or wrong credentials)
 			} else {
 				// determine if we should be displaying a recaptcha message
-				if ( ! $captcha_valid) {
+				if (( ! $captcha_valid && $captcha_received) || $captcha_required) {
 					$additional_messages = array(__(Kohana::message('user', 'recaptcha_not_valid')));
 				} else {
 					$additional_messages = array();
