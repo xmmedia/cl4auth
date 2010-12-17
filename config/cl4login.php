@@ -18,4 +18,9 @@ return array(
 		'too_many_attempts' => 6,
 		'verifying_human' => 7,
 	),
+
+	// accounts that cannot have their password reset
+	'admin_accounts' => array(
+		'admin@admin.com'
+	),
 );

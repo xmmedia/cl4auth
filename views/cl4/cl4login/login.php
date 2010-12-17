@@ -31,6 +31,6 @@
 	echo Form::close();
 	?>
 
-	<div class="forgot_link"><?php echo HTML::anchor('account/forgot', 'Forgot your password?') ?></div>
+	<div class="forgot_link"><?php echo HTML::anchor('login/forgot', 'Forgot your password?') ?></div>
 	<div class="clear"></div>
 </div>
