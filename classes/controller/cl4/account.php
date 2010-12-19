@@ -46,7 +46,7 @@ class Controller_cl4_Account extends Controller_Base {
 			if ($validate === TRUE) {
 				try {
 					// the user no longer is forced to update their profile
-					$mode->force_update_profile_flag = FALSE;
+					$model->force_update_profile_flag = FALSE;
 					// save first, so that the model has an id when the relationships are added
 					$model->save();
 					// message: profile saved
