@@ -27,6 +27,12 @@ class Model_cl4_UserProfile extends Model_User {
 			'reset_token' => array(
 				'edit_flag' => FALSE,
 			),
+			'force_update_profile_flag' => array(
+				'edit_flag' => FALSE,
+			),
+			'force_update_password_flag' => array(
+				'edit_flag' => FALSE,
+			),
 		),
 	);
 } // class
