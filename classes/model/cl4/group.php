@@ -28,6 +28,10 @@ class Model_cl4_Group extends ORM {
 		'description' => 'Description',
 	);
 
+	protected $_sorting = array(
+		'name' => 'ASC',
+	);
+
 	// column definitions
 	protected $_table_columns = array(
 		/**

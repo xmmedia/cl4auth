@@ -16,7 +16,8 @@ class Model_cl4_AuthType extends ORM {
 
 	// sorting
 	protected $_sorting = array(
-		'display_order' => 'ASC'
+		'display_order' => 'ASC',
+		'name' => 'ASC',
 	);
 
 	// column definitions
