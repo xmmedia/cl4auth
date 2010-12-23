@@ -105,4 +105,18 @@ class Model_cl4_AuthLog extends ORM {
 			),
 		),
 	);
-}
+
+	/**
+	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
+	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
+	 */
+	protected $_display_order = array(
+		10 => 'id',
+		20 => 'user_id',
+		30 => 'username',
+		40 => 'access_time',
+		50 => 'auth_type_id',
+		60 => 'browser',
+		70 => 'ip_address',
+	);
+} // class Model_cl4_AuthLog

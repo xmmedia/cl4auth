@@ -34,12 +34,10 @@ class Model_cl4_GroupPermission extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => FALSE,
 			'view_flag' => FALSE,
-			'display_order' => 10,
 			'is_nullable' => FALSE,
 		),
 		'group_id' => array(
 			'field_type' => 'select',
-			'display_order' => 20,
 			'list_flag' => TRUE,
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
@@ -54,7 +52,6 @@ class Model_cl4_GroupPermission extends ORM {
 		),
 		'permission_id' => array(
 			'field_type' => 'select',
-			'display_order' => 30,
 			'list_flag' => TRUE,
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
@@ -68,5 +65,15 @@ class Model_cl4_GroupPermission extends ORM {
 				),
 			),
 		),
+	);
+
+	/**
+	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
+	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
+	 */
+	protected $_display_order = array(
+		10 => 'id',
+		20 => 'group_id',
+		30 => 'permission_id',
 	);
 } // class

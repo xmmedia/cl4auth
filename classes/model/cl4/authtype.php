@@ -32,12 +32,10 @@ class Model_cl4_AuthType extends ORM {
 			'edit_flag' => TRUE,
 			'search_flag' => FALSE,
 			'view_flag' => FALSE,
-			'display_order' => 10,
 			'is_nullable' => FALSE,
 		),
 		'name' => array(
 			'field_type' => 'text',
-			'display_order' => 20,
 			'list_flag' => TRUE,
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
@@ -49,7 +47,6 @@ class Model_cl4_AuthType extends ORM {
 		),
 		'display_order' => array(
 			'field_type' => 'text',
-			'display_order' => 30,
 			'list_flag' => TRUE,
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
@@ -62,5 +59,19 @@ class Model_cl4_AuthType extends ORM {
 		),
 	);
 
-	protected $_belongs_to = array('auth_log' => array('model' => 'authlog'));
-}
+	protected $_belongs_to = array(
+		'auth_log' => array(
+			'model' => 'authlog'
+		)
+	);
+
+	/**
+	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
+	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
+	 */
+	protected $_display_order = array(
+		10 => 'id',
+		20 => 'name',
+		30 => 'display_order',
+	);
+} // class Model_cl4_AuthType

@@ -70,7 +70,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => TRUE,
 			'search_flag'    => FALSE,
 			'view_flag'      => FALSE,
-			'display_order'  => 10,
 			'is_nullable'    => FALSE,
 		),
 		'expiry_date' => array(
@@ -80,7 +79,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => FALSE,
 			'view_flag'      => FALSE,
 			'is_nullable'    => FALSE,
-			'display_order'  => 20,
 		),
 		'username' => array(
 			'field_type'     => 'text',
@@ -88,7 +86,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => TRUE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 30,
 			'is_nullable'    => FALSE,
 		),
 		'password' => array(
@@ -97,7 +94,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => TRUE,
 			'search_flag'    => FALSE,
 			'view_flag'      => FALSE,
-			'display_order'  => 40,
 			'is_nullable'    => FALSE,
 		),
 		'first_name' => array(
@@ -106,7 +102,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => TRUE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 50,
 			'is_nullable'    => FALSE,
 		),
 		'last_name' => array(
@@ -115,7 +110,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => TRUE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 60,
 			'is_nullable'    => FALSE,
 		),
 		'active_flag' => array(
@@ -124,7 +118,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => TRUE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 70,
 			'is_nullable'    => FALSE,
 			'field_options'  => array(
 				'default_value' => 1,
@@ -136,7 +129,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => FALSE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 80,
 			'is_nullable'    => FALSE,
 		),
 		'last_login' => array(
@@ -145,7 +137,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => FALSE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 90,
 			'is_nullable'    => FALSE,
 		),
 		'failed_login_count' => array(
@@ -154,7 +145,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => TRUE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 100,
 			'is_nullable'    => FALSE,
 		),
 		'last_failed_login' => array(
@@ -163,7 +153,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => FALSE,
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
-			'display_order'  => 110,
 			'is_nullable'    => FALSE,
 		),
 		'reset_token' => array(
@@ -172,7 +161,6 @@ class Model_cl4_User extends Model_Auth_User {
 			'edit_flag'      => FALSE,
 			'search_flag'    => FALSE,
 			'view_flag'      => FALSE,
-			'display_order'  => 120,
 			'is_nullable'    => FALSE,
 		),
 		'force_update_password_flag' => array(
@@ -216,6 +204,27 @@ class Model_cl4_User extends Model_Auth_User {
 	protected $_expires_column = array(
 		'column' 	=> 'expiry_date',
 		'default'	=> 0,
+	);
+
+	/**
+	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
+	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
+	 */
+	protected $_display_order = array(
+		10 => 'id',
+		20 => 'expiry_date',
+		30 => 'username',
+		40 => 'password',
+		50 => 'first_name',
+		60 => 'last_name',
+		70 => 'active_flag',
+		80 => 'login_count',
+		90 => 'last_login',
+		100 => 'failed_login_count',
+		110 => 'last_failed_login',
+		120 => 'reset_token',
+		130 => 'force_update_password_flag',
+		140 => 'force_update_profile_flag',
 	);
 
 	// Stores the failed login count before a login attempt. Set in login()

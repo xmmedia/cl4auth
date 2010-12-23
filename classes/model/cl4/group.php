@@ -40,7 +40,6 @@ class Model_cl4_Group extends ORM {
 		*/
 		'id' => array(
 			'field_type' => 'hidden',
-			'display_order' => 10,
 			'list_flag' => FALSE,
 			'edit_flag' => TRUE,
 			'search_flag' => FALSE,
@@ -49,7 +48,6 @@ class Model_cl4_Group extends ORM {
 		),
 		'name' => array(
 			'field_type' => 'text',
-			'display_order' => 20,
 			'list_flag' => TRUE,
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
@@ -58,7 +56,6 @@ class Model_cl4_Group extends ORM {
 		),
 		'description' => array(
 			'field_type' => 'textarea',
-			'display_order' => 30,
 			'list_flag' => TRUE,
 			'edit_flag' => TRUE,
 			'search_flag' => TRUE,
@@ -70,5 +67,15 @@ class Model_cl4_Group extends ORM {
 	// Filters
 	protected $_filters = array(
 		TRUE => array('trim' => array()),
+	);
+
+	/**
+	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
+	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
+	 */
+	protected $_display_order = array(
+		10 => 'id',
+		20 => 'name',
+		30 => 'display_order',
 	);
 } // class

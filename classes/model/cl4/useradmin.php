@@ -18,13 +18,14 @@ class Model_cl4_UserAdmin extends Model_User {
 				'field_type' => 'password',
 				'list_flag' => FALSE,
 				'edit_flag' => TRUE,
-				'display_order' => 40,
 			),
 			'password_confirm' => array(
 				'field_type' => 'password',
 				'edit_flag' => TRUE,
-				'display_order' => 45,
 			),
+		),
+		'_display_order' => array(
+			45 => 'password_confirm',
 		),
 	);
 } // class
