@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die ('No direct script access.');
 
-class Model_cl4_UserAdmin extends Model_User {
+class Model_cl4_User_Admin extends Model_User {
 	protected $_override_properties = array(
 		'_rules' => array(
 			// remove the validation for password and password_confirm as we'll be a callback instead because we need to check if the values have been passed

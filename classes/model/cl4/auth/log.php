@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct access allowed.');
 
-class Model_cl4_AuthLog extends ORM {
+class Model_cl4_Auth_Log extends ORM {
 	protected $_table_names_plural = FALSE;
 	protected $_table_name = 'auth_log';
 	public $_table_name_display = 'Auth Log';
@@ -119,4 +119,4 @@ class Model_cl4_AuthLog extends ORM {
 		60 => 'browser',
 		70 => 'ip_address',
 	);
-} // class Model_cl4_AuthLog
+} // class Model_cl4_Auth_Log

@@ -194,7 +194,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'foreign_key' => 'group_id',
 		),
 		'auth_log' => array(
-			'model'       => 'authlog',
+			'model'       => 'auth_log',
 			'foreign_key' => 'user_id',
 			'through'     => 'auth_log',
 			'far_key'     => 'id',
@@ -337,7 +337,7 @@ class Model_cl4_User extends Model_Auth_User {
 	/**
 	* Add an auth log
 	* If the model is loaded, it will use the relationship to the model
-	* If the model is not loaded, it will create a new authlog model
+	* If the model is not loaded, it will create a new auth_log model
 	*
 	* @param   int    $auth_type  The auth type id
 	* @param   mixed  $username   The username, if loaded, this will be replaced with the current model's username
@@ -354,10 +354,10 @@ class Model_cl4_User extends Model_Auth_User {
 
 		if ($this->_loaded) {
 			$auth_log_data['username'] = $this->username;
-			$this->add('auth_log', ORM::factory('authlog'), $auth_log_data);
+			$this->add('auth_log', ORM::factory('auth_log'), $auth_log_data);
 		} else {
 			// the user is not valid, so the object doesn't contain an information and screws up because it can't set the user_id
-			$auth_log = ORM::factory('authlog')
+			$auth_log = ORM::factory('auth_log')
 				->values($auth_log_data)
 				->save();
 		} // if

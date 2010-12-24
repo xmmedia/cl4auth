@@ -3,12 +3,12 @@
 return array(
 	// list of models in this module for cl4admin
 	'model_list' => array(
-		'useradmin' => 'User',
-		'authlog' => 'Auth Log',
-		'authtype' => 'Auth Type',
+		'user_admin' => 'User',
+		'auth_log' => 'Auth Log',
+		'auth_type' => 'Auth Type',
 		'group' => 'Group',
-		'grouppermission' => 'Group - Permission',
+		'group_permission' => 'Group - Permission',
 		'permission' => 'Permission',
-		'usergroup' => 'User - Group',
+		'user_group' => 'User - Group',
 	),
 );
