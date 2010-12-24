@@ -272,7 +272,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 
 	/**
 	* Checks to see if the stored password and the passed password are the same
-	* Any of the automatic query stuff that is applied when find() is run on the user model will also be applied here
+	* Any of the automatic query stuff that is applied when find() is run on the user model will also be applied here when retrieving the user (if it's not passed)
 	*
 	* @param  ORM  $user  The user model or the username
 	* @param  string  $password  The password to compare against
