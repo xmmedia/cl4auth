@@ -256,16 +256,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 		// If the passwords match, perform a login
 		if ($user->loaded() && $user->password === $password) {
 			if ($remember === TRUE) {
-				// Create a new autologin token
-				$token = ORM::factory('user_token');
-
-				// Set token data
-				$token->user_id = $user->id;
-				$token->expires = time() + $this->_config['remember_lifetime'];
-				$token->save();
-
-				// Set the autologin cookie
-				Cookie::set('authautologin', $token->token, $this->_config['remember_lifetime']);
+				$this->remember($user);
 			} // if
 
 			// Finish the login
