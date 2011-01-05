@@ -1,9 +1,9 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 return array(
-	'max_failed_login_count' => 5, // the maximum number of times a user can attempt to login before having to wait [failed_login_wait_time] minutes
+	'max_failed_login_count' => 5, // the maximum number of times a user can attempt to login before having to wait [failed_login_wait_time] minutes (this should be more than [failed_login_captcha_display])
 	'failed_login_wait_time' => 5, // the number of minutes the user needs to wait before trying to login again after failing [max_failed_login_count] times
-	'failed_login_captcha_display' => 5, // the number of times a user can fail to login per session before they need to enter a captcha before logging in
+	'failed_login_captcha_display' => 3, // the number of times a user can fail to login per session before they need to enter a captcha before logging in (this should be less than [max_failed_login_count])
 
 	'session_key' => 'cl4_login', // the key in the session where the information such as the number of login attempts and forced captcha are stored
 
