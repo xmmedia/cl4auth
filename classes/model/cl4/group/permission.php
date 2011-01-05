@@ -60,8 +60,8 @@ class Model_cl4_Group_Permission extends ORM {
 			'field_options' => array(
 				'source' => array(
 					'source' => 'sql',
-					'data' => "SELECT id, permission FROM permission ORDER BY permission",
-					'label' => 'permission',
+					'data' => "SELECT id, CONCAT_WS('', name, ' (', permission, ')') AS name FROM permission ORDER BY name, permission",
+					'label' => 'name',
 				),
 			),
 		),
