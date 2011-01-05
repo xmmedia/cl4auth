@@ -13,9 +13,10 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	* Checks if a session is active.
 	*
 	* @param   mixed    permission string or array of permissions
+	* @param   boolean  check user for every role applied (TRUE, by default) or if any?
 	* @return  boolean
 	*/
-	public function logged_in($permission = NULL) {
+	public function logged_in($permission = NULL, $all_required = TRUE) {
 		$status = FALSE;
 
 		// Get the user from the session
@@ -27,7 +28,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 			$status = TRUE;
 
 			if ( ! empty($permission)) {
-				$status = $this->allowed($permission);
+				$status = $this->allowed($permission, NULL, $all_required);
 			}
 		}
 
@@ -54,9 +55,10 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	* @param 	mixed	$permission		If a string, then the user is required to have that permission; if it's an array then they need to have all the permissions
 	* 									If an object and a sub class of Controller_Base then it will use controller_allowed() and base the permission checking on the vars within that controller
 	* @param	string	$action_name	If $permission is a object then this needs to be the action to test against
-	* @return	bool
+	* @param    boolean  check user for every role applied (TRUE, by default) or if any?
+	* @return	boolean
 	*/
-	public function allowed($permission, $action_name = NULL) {
+	public function allowed($permission, $action_name = NULL, $all_required = TRUE) {
 		$status = FALSE;
 
 		if (is_object($permission) && is_subclass_of($permission, 'Controller_Base') && $action_name !== NULL) {
@@ -73,12 +75,15 @@ class cl4_Auth extends Kohana_Auth_ORM {
 				// Multiple permissions to check
 				if (is_array($permission)) {
 					$has_all_permissions = TRUE;
+					$has_one_permission = FALSE;
 					// Check each permission
 					foreach ($permission as $_permission) {
 						// Check to see if we the permission is already stored so we don't need to check in the DB
 						if (array_key_exists($_permission, $this->permissions)) {
 							if ( ! $this->permissions[$_permission]) {
 								$has_all_permissions = FALSE;
+							} else {
+								$has_one_permission = TRUE;
 							}
 
 						} else {
@@ -89,12 +94,15 @@ class cl4_Auth extends Kohana_Auth_ORM {
 								$has_all_permissions = FALSE;
 							} else {
 								$this->permissions[$_permission] = TRUE;
+								$has_one_permission = TRUE;
 							}
 						} // if
 					} // foreach
 
 					// if the user has all the permissions passed, set the status to true
-					if ($has_all_permissions) {
+					if ($has_all_permissions && $all_required) {
+						$status = TRUE;
+					} else if ($has_one_permission && ! $all_required) {
 						$status = TRUE;
 					}
 
