@@ -30,10 +30,10 @@ class Controller_cl4_Login extends Controller_Base {
 		$attempts = Arr::path($this->session, $login_config['session_key'] . '.attempts', 0);
 		$force_captcha = Arr::get($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
 
-		// Update number of login attempts
-		++$attempts;
 		// If more than three login attempts, add a captcha to form
 		$captcha_required = ($force_captcha || $attempts > $login_config['failed_login_captcha_display']);
+		// Update number of login attempts
+		++$attempts;
 		$this->session[$login_config['session_key']]['attempts'] = $attempts;
 		$login_view->set('add_captcha', $captcha_required);
 
