@@ -37,7 +37,7 @@ class Controller_cl4_Account extends Controller_Base {
 		// get the current user from auth
 		$user = Auth::instance()->get_user();
 		// use the user loaded from auth to get the user profile model (extends user)
-		$model = ORM::factory('user_profile', $user->id);
+		$model = ORM::factory('user_profile')->find($user->pk());
 
 		if ( ! empty($_POST) && ! empty($_POST['form']) && $_POST['form'] == 'profile') {
 			$validate = $model->save_values()->validate_profile_edit();
@@ -66,7 +66,7 @@ class Controller_cl4_Account extends Controller_Base {
 		} // if
 
 		// use the user loaded from auth to get the user profile model (extends user)
-		$model = ORM::factory('user_profile', $user->id, array(
+		$model = ORM::factory('user_profile', $user->pk(), array(
 			'display_reset' => FALSE,
 			'hidden_fields' => array(
 				Form::hidden('form', 'profile'),
@@ -96,10 +96,12 @@ class Controller_cl4_Account extends Controller_Base {
 			// check if there are any errors
 			if (count($validation->errors()) == 0) {
 				try {
-					ORM::factory('user_password', $user->id)
-						->values(array('password' => $_POST['new_password']))
-						// user no longer needs to update their password
-						->values(array('force_update_password_flag' => FALSE))
+					$model = ORM::factory('user_password', $user->pk())
+						->values(array(
+							'password' => $_POST['new_password'],
+							// user no longer needs to update their password
+							'force_update_password_flag' => FALSE,
+						))
 						->save();
 
 					Message::add(__(Kohana::message('account', 'password_changed')), Message::$notice);
