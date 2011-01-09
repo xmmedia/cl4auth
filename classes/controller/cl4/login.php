@@ -127,7 +127,7 @@ class Controller_cl4_Login extends Controller_Base {
 		}
 
 		// set the user name and password in the view so the fields can be populated (makes logging in easier)
-		$login_view->set('username', ( ! empty($validate['username']) ? $validate['username'] : ''));
+		$login_view->set('username', ( ! empty($validate['username']) ? $validate['username'] : cl4::get_param('username')));
 		$login_view->set('password', ( ! empty($validate['password']) ? $validate['password'] : ''));
 		$login_view->set('add_captcha', $captcha_required);
 
@@ -267,16 +267,15 @@ EOA;
 					$mail->add_user($user->id);
 					$mail->Subject = LONG_NAME . ' Password Reset';
 
-					$url = 'login/reset?' . http_build_query(array(
+					// build a link with action reset including their username and the reset token
+					$url = URL::site(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'reset')) . '?' . http_build_query(array(
 						'username' => $user->username,
 						'reset_token' => $user->reset_token,
-					), '', '&');
-					$link = HTML::anchor($url, 'click here', array('target' => '_blank'));
+					)), TRUE);
 
 					$mail->Body = View::factory('cl4/cl4login/forgot_link')
 						->set('app_name', LONG_NAME)
 						->set('url', $url)
-						->set('link', $link)
 						->set('admin_email', ADMIN_EMAIL);
 
 					$mail->Send();
@@ -338,12 +337,14 @@ EOA;
 					$mail->add_user($user->id);
 					$mail->Subject = LONG_NAME . ' New Password';
 
-					$link = URL_ROOT . '/login';
+					// provide a link to the user including their username
+					$url = URL::site(Route::get(Route::name(Request::instance()->route))->uri(), TRUE) . '?' . http_build_query(array('username' => $user->username));
 
-					$mail->Body = View::factory('cl4/cl4login/forgot_link')
+					$mail->Body = View::factory('cl4/cl4login/forgot_reset')
 						->set('app_name', LONG_NAME)
 						->set('username', $user->username)
 						->set('password', $password)
+						->set('url', $url)
 						->set('admin_email', ADMIN_EMAIL);
 
 					$mail->Send();
