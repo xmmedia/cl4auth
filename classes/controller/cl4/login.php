@@ -132,8 +132,6 @@ class Controller_cl4_Login extends Controller_Base {
 		$login_view->set('add_captcha', $captcha_required);
 
 		$this->template->body_html = $login_view;
-
-		$this->add_on_load_js("\$('#username').focus();");
 	} // function
 
 	/**

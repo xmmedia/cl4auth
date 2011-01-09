@@ -10,7 +10,7 @@
 		<li>
 			<ul>
 				<li class="field_label" style=""><label for="username">Email Address / Username</label></li>
-				<li class="field_value"><?php echo Form::input('username', $username, array('size' => 20, 'maxlength' => 100, 'id' => 'username')); ?></li>
+				<li class="field_value"><?php echo Form::input('username', $username, array('size' => 20, 'maxlength' => 100, 'id' => 'username', 'autofocus')); ?></li>
 			</ul>
 		</li>
 		<li>
