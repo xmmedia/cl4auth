@@ -28,7 +28,7 @@ class Controller_cl4_Login extends Controller_Base {
 
 		// Get number of login attempts this session
 		$attempts = Arr::path($this->session, $login_config['session_key'] . '.attempts', 0);
-		$force_captcha = Arr::get($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
+		$force_captcha = Arr::path($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
 
 		// If more than three login attempts, add a captcha to form
 		$captcha_required = ($force_captcha || $attempts > $login_config['failed_login_captcha_display']);
@@ -66,7 +66,7 @@ class Controller_cl4_Login extends Controller_Base {
 			// if the captcha is required, then also make sure it's valid
 			if ($user->login($validate, FALSE, $captcha_valid) && ( ! $captcha_required || ($captcha_required && $captcha_valid))) {
 				// if the account has more than 5 login attempts and the captcha in invalid (or not received) then go back to the login page and force them to enter a captcha
-				if ($user->_failed_login_count > $login_config['max_failed_login_count'] && ! $captcha_valid) {
+				if ($user->too_many_login_attempts() && ! $captcha_valid) {
 					// log out the user because they need to verified as human first
 					$this->session[$login_config['session_key']]['force_captcha'] = TRUE;
 					$captcha_required = TRUE;
@@ -104,8 +104,10 @@ class Controller_cl4_Login extends Controller_Base {
 			// If login failed (captcha and/or wrong credentials)
 			} else {
 				// determine if we should be displaying a recaptcha message
-				if (( ! $captcha_valid && $captcha_received) || $captcha_required) {
+				if ( ! $captcha_valid && $captcha_received) {
 					$additional_messages = array(__(Kohana::message('user', 'recaptcha_not_valid')));
+				} else if ($captcha_required && ! $captcha_received) {
+					$additional_messages = array(__(Kohana::message('user', 'enter_recaptcha')));
 				} else {
 					$additional_messages = array();
 				}

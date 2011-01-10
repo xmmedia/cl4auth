@@ -262,11 +262,12 @@ class Model_cl4_User extends Model_Auth_User {
 			$this->add_login_where($login_details['username'])
 				->find();
 
+			// store the login count so we can use it later to check the number of logins
 			$this->_failed_login_count = $this->failed_login_count;
 
 			// if there are too many recent failed logins, fail now
-			if ($this->_loaded && $this->too_many_login_attempts()) {
-				// fail (too many failed logins within 5 minutes).
+			if ($this->_loaded && $this->too_many_login_attempts() && ! $verified_human) {
+				// fail: too many attempted logins
 				$this->increment_failed_login();
 
 				$login_details->error('username', 'too_many_attempts');
@@ -277,7 +278,7 @@ class Model_cl4_User extends Model_Auth_User {
 					$login_config = Kohana::config('cl4login');
 					// check if they have attempted too many times (not matter the time frame) and haven't been verified as human (protection for bots)
 					// return true, as technically they have logged in, but the session key won't be set
-					if ( ! $verified_human && $this->failed_login_count > $login_config['max_failed_login_count']) {
+					if ( ! $verified_human && $this->too_many_login_attempts()) {
 						$status = TRUE;
 						$auth_type = $auth_types['verifying_human'];
 
@@ -366,14 +367,14 @@ class Model_cl4_User extends Model_Auth_User {
 	} // function add_auth_log
 
 	/**
-	* Determine if the current user has too many login attempts in the 5 minutes
+	* Determine if the current user has too many login attempts and therefore is required to enter a captcha
 	* Returns TRUE if they do, FALSE if they don't
 	*
-	* @return  bool
+	* @return  boolean
 	*/
 	public function too_many_login_attempts() {
 		$login_config = Kohana::config('cl4login');
-		return ($this->failed_login_count > $login_config['max_failed_login_count']);
+		return (($this->_failed_login_count !== NULL && $this->_failed_login_count > $login_config['max_failed_login_count']) || ($this->failed_login_count > $login_config['max_failed_login_count']));
 	}
 
 	/**
