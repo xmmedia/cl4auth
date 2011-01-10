@@ -373,7 +373,7 @@ class Model_cl4_User extends Model_Auth_User {
 	*/
 	public function too_many_login_attempts() {
 		$login_config = Kohana::config('cl4login');
-		return ($this->failed_login_count > $login_config['max_failed_login_count'] && strtotime($this->last_failed_login) > strtotime('-' . $login_config['failed_login_wait_time'] . ' minutes'));
+		return ($this->failed_login_count > $login_config['max_failed_login_count']);
 	}
 
 	/**
