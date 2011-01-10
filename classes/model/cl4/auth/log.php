@@ -5,6 +5,7 @@ class Model_cl4_Auth_Log extends ORM {
 	protected $_table_name = 'auth_log';
 	public $_table_name_display = 'Auth Log';
 	protected $_primary_val = 'username'; // default: name (column used as primary value)
+	protected $_log = FALSE; // don't log changes because it's pointless to log changes to a log table
 
 	protected $_belongs_to = array('user' => array('model' => 'user'));
 
