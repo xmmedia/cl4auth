@@ -190,8 +190,8 @@ class Model_cl4_User extends Model_Auth_User {
 		'group' => array(
 			'model'       => 'group',
 			'through'     => 'user_group',
-			'far_key'     => 'user_id',
-			'foreign_key' => 'group_id',
+			'far_key'     => 'group_id',
+			'foreign_key' => 'user_id',
 		),
 		'auth_log' => array(
 			'model'       => 'auth_log',
