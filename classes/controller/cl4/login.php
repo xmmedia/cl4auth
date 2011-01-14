@@ -80,6 +80,7 @@ class Controller_cl4_Login extends Controller_Base {
 						Message::add(Kohana::message('user', $message_path), Message::$notice);
 
 						// instead of redirecting them to the location they requested, redirect them to the profile page
+						// @todo make this use Route::get()
 						$redirect = '/account/profile';
 					} // if
 
