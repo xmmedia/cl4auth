@@ -15,7 +15,7 @@ class Controller_cl4_Account extends Controller_Base {
 	* If the user is not logged in, this will then redirect to the login page
 	*/
 	public function action_index() {
-		Request::instance()->redirect('account/profile');
+		Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
 	} // function
 
 	/**
@@ -24,7 +24,7 @@ class Controller_cl4_Account extends Controller_Base {
 	public function action_cancel() {
 		Message::add('Your last action was cancelled.', Message::$notice);
 
-		Request::instance()->redirect('account/profile');
+		Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
 	}
 
 	/**
@@ -52,7 +52,7 @@ class Controller_cl4_Account extends Controller_Base {
 					// message: profile saved
 					Message::add(__(Kohana::message('account', 'profile_saved')), Message::$notice);
 					// redirect because they have changed their name, which is displayed on the page
-					Request::instance()->redirect('account/profile');
+					Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
 
 				} catch (Exception $e) {
 					cl4::exception_handler($e);
@@ -76,7 +76,7 @@ class Controller_cl4_Account extends Controller_Base {
 		// prepare the view & form
 		$this->template->body_html = View::factory('cl4/cl4account/profile')
 			->set('edit_fields', $model->get_form(array(
-				'form_action' => '/account/profile',
+				'form_action' => URL::site(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile'))),
 				'form_id' => 'editprofile',
 			)));
 	} // function action_profile
@@ -107,7 +107,7 @@ class Controller_cl4_Account extends Controller_Base {
 					Message::add(__(Kohana::message('account', 'password_changed')), Message::$notice);
 
 					// redirect and exit
-					Request::instance()->redirect('account/profile');
+					Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
 
 				} catch (Exeception $e) {
 					cl4::exception_handler($e);

@@ -3,7 +3,7 @@
 
 	<p>Please send me a link to reset my password.</p>
 
-	<?php echo Form::open('login/forgot'); ?>
+	<?php echo Form::open(); ?>
 	<p>To start, enter email address: <?php echo Form::input('reset_username', '', array('autofocus')); ?></p>
 	<p>Also enter the characters you see in the pictures below.</p>
 <?php

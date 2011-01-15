@@ -8,7 +8,7 @@
 <h1>Change Password</h1>
 <p>To change your password, use the form below:</p>
 
-<?php echo Form::open('/account/password');
+<?php echo Form::open(URL::site(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'password'))));
 	echo Form::hidden('form', 'password');
 
 $table = new HTMLTable(array(
@@ -40,7 +40,7 @@ echo Form::submit('cl4_submit', 'Save');
 echo Form::input('cl4_cancel', __('Cancel'), array(
 	'type' => 'button',
 	'class' => 'cl4_button_link',
-	'data-cl4_link' => '/account/cancel',
+	'data-cl4_link' => URL::site(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'cancel'))),
 ));
 ?>
 </div>

@@ -80,8 +80,7 @@ class Controller_cl4_Login extends Controller_Base {
 						Message::add(Kohana::message('user', $message_path), Message::$notice);
 
 						// instead of redirecting them to the location they requested, redirect them to the profile page
-						// @todo make this use Route::get()
-						$redirect = '/account/profile';
+						$redirect = Route::get('account')->uri(array('action' => 'profile'));
 					} // if
 
 					if ( ! empty($redirect) && is_string($redirect)) {
@@ -126,7 +125,7 @@ class Controller_cl4_Login extends Controller_Base {
 
 		if ( ! empty($timed_out)) {
 			// they have come from the timeout page, so send them back there
-			Request::instance()->redirect('login/timedout' . $this->get_redirect_query());
+			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'timedout')) . $this->get_redirect_query());
 		}
 
 		// set the user name and password in the view so the fields can be populated (makes logging in easier)
@@ -140,16 +139,17 @@ class Controller_cl4_Login extends Controller_Base {
 	/**
 	* Redirects the user the first page they should see after login
 	* $redirect contains the page they may have requested before logging in and they should be redirected there
+	* If $redirect is is NULL then the default redirect from the config will be used
 	*
-	* @param  string  $redirect
+	* @param  string  $redirect  The path to redirect to
 	* @return  void  never returns
 	*/
 	protected function login_success_redirect($redirect = NULL) {
-		if ( ! empty($redirect)) {
+		if ($redirect !== NULL) {
 			Request::instance()->redirect($redirect);
 		} else {
-			$default_redirect = Kohana::config('auth.default_login_redirect');
-			Request::instance()->redirect($default_redirect);
+			$auth_config = Kohana::config('auth');
+			Request::instance()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
 		}
 	} // function login_success_redirect
 
@@ -164,21 +164,21 @@ class Controller_cl4_Login extends Controller_Base {
 				}
 
 				Message::add(__(Kohana::message('user', 'username.logged_out')), Message::$notice);
-			}
+			} // if
 
 			// redirect to the user account and then the signin page if logout worked as expected
-			Request::instance()->redirect('login' . $this->get_redirect_query());
+			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri() . $this->get_redirect_query());
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
 			Message::add(__(Kohana::message('user', 'username.not_logged_out')), Message::$error);
 
 			if ( ! cl4::is_dev()) {
 				// redirect them to the default page
-				$default_redirect = Kohana::config('auth.default_login_redirect');
-				Request::instance()->redirect($default_redirect);
+				$auth_config = Kohana::config('auth');
+				Request::instance()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
 			}
-		}
-	} // function
+		} // try
+	} // function action_logout
 
 	/**
 	* Display a page that displays the username and asks the user to enter the password
@@ -194,7 +194,7 @@ class Controller_cl4_Login extends Controller_Base {
 
 		if ( ! $user || ($max_lifetime > 0 && Auth::instance()->timed_out($max_lifetime))) {
 			// user is not logged in at all or they have reached the maximum amount of time we allow sometime to stay logged in, so redirect them to the login page
-			Request::instance()->redirect('login/logout' . $this->get_redirect_query());
+			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'logout')) . $this->get_redirect_query());
 		}
 
 		$this->template->page_title = 'Timed Out';
@@ -205,10 +205,8 @@ class Controller_cl4_Login extends Controller_Base {
 
 		$this->template->body_html = $timedout_view;
 
-		$this->template->on_load_js .= <<<EOA
-$('#password').focus();
-EOA;
-	}
+		$this->add_on_load_js('$(\'#password\').focus();');
+	} // function action_timedout
 
 	/**
 	* View: Access not allowed.
@@ -218,7 +216,7 @@ EOA;
 		$this->template->title = 'Access not allowed';
 		$view = $this->template->body_html = View::factory('cl4/cl4login/no_access')
 			->set('referrer', cl4::get_param('referrer'));
-	} // function
+	} // function action_noaccess
 
 	/**
 	* Returns the redirect value as a query string ready to use in a direct
@@ -230,9 +228,12 @@ EOA;
 	private function get_redirect_query() {
 		$redirect = cl4::get_param('redirect');
 
-		if ( ! empty($redirect)) return URL::array_to_query(array('redirect' => $redirect), '&');
-		else return '';
-	} // function
+		if ( ! empty($redirect)) {
+			return URL::array_to_query(array('redirect' => $redirect), '&');
+		} else {
+			return '';
+		}
+	} // function get_redirect_query
 
 	/**
 	* A basic implementation of the "Forgot password" functionality
@@ -357,16 +358,16 @@ EOA;
 					throw $e;
 				}
 
-				Request::instance()->redirect('login');
+				Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri());
 
 			} else {
 				Message::add(__(Kohana::message('login', 'password_email_username_not_found')), Message::$error);
-				Request::instance()->redirect('login/forgot');
+				Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'forgot')));
 			}
 
 		} else {
 			Message::add(__(Kohana::message('login', 'password_email_partial')), Message::$error);
-			Request::instance()->redirect('login/forgot');
+			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'forgot')));
 		}
 	} // function
 
