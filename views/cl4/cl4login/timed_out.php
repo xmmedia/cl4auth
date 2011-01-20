@@ -6,7 +6,7 @@ $logout_uri = Route::get(Route::name(Request::instance()->route))->uri(array('ac
 	<p>Your login has timed out. To continue using your current login, enter your password.</p>
 	<p><?php echo HTML::anchor($logout_uri, 'Click here to logout or login as different user.'); ?></p>
 
-	<?php echo Form::open('login'); ?>
+	<?php echo Form::open(Route::get('login')->uri()); ?>
 	<?php echo Form::hidden('redirect', $redirect); ?>
 	<?php echo Form::hidden('timed_out', 1); ?>
 
