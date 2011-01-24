@@ -242,12 +242,8 @@ class Model_cl4_User extends Model_Auth_User {
 	* @return  boolean  See special case in comments
 	*/
 	public function login(array & $login_details, $redirect = FALSE, $verified_human = FALSE) {
-		$login_details = Validate::factory($login_details)
-			->label('username', $this->_labels['username'])
-			->label('password', $this->_labels['password'])
-			->filter('username', 'trim')
-			->rules('username', $this->_rules['username'])
-			->rules('password', $this->_rules['password']);
+		// get the validation object (no checking done)
+		$this->get_login_validate($login_details);
 
 		// Get the remember login option
 		$remember = ! empty($login_details['remember']);
@@ -318,6 +314,27 @@ class Model_cl4_User extends Model_Auth_User {
 
 		return $status;
 	} // function login
+
+	/**
+	* Adds the values from the login post and creates the Validate object based the rules within the model (user)
+	* $login_details is returned by reference, becoming a Validate object in the function
+	* Doesn't actually do the validation
+	*
+	* @param   array    $login_details    values to check (passed by reference)
+	*
+	* @chainable
+	* @return  ORM
+	*/
+	public function get_login_validate(array & $login_details) {
+		$login_details = Validate::factory($login_details)
+			->label('username', $this->_labels['username'])
+			->label('password', $this->_labels['password'])
+			->filter('username', 'trim')
+			->rules('username', $this->_rules['username'])
+			->rules('password', $this->_rules['password']);
+
+		return $this;
+	} // function get_login_validate
 
 	/**
 	* Increments the number of failed login attempts and sets the last failed attempt date/time.

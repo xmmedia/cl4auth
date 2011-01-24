@@ -35,7 +35,6 @@ class Controller_cl4_Login extends Controller_Base {
 		// Update number of login attempts
 		++$attempts;
 		$this->session[$login_config['session_key']]['attempts'] = $attempts;
-		$login_view->set('add_captcha', $captcha_required);
 
 		// load recaptcha
 		// do this here because there are likely to be a lot of accesses to this action that will never make it to here
@@ -64,7 +63,7 @@ class Controller_cl4_Login extends Controller_Base {
 			// If the post data validates using the rules setup in the user model
 			// $validate is passed by reference and becomes a Validate object inside login()
 			// if the captcha is required, then also make sure it's valid
-			if ($user->login($validate, FALSE, $captcha_valid) && ( ! $captcha_required || ($captcha_required && $captcha_valid))) {
+			if (( ! $captcha_required || ($captcha_required && $captcha_valid)) && $user->login($validate, FALSE, $captcha_valid)) {
 				// if the account has more than 5 login attempts and the captcha in invalid (or not received) then go back to the login page and force them to enter a captcha
 				if ($user->too_many_login_attempts() && ! $captcha_valid) {
 					// log out the user because they need to verified as human first
@@ -112,6 +111,11 @@ class Controller_cl4_Login extends Controller_Base {
 					$additional_messages = array();
 				}
 
+				// if $validate is not an object, then get the Validate object from user and then do the validation so we can retrieve the errors (other than just missing the captcha)
+				if ( ! is_object($validate)) {
+					$user->get_login_validate($validate);
+					$validate->check();
+				}
 				// Get errors for display in view and set the username and password to populate the fields (makes it easier for the user)
 				Message::add(Message::add_validate_errors($validate, 'user', $additional_messages), Message::$error);
 
