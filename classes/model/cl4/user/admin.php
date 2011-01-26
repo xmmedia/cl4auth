@@ -1,31 +1,21 @@
 <?php defined('SYSPATH') or die ('No direct script access.');
 
 class Model_cl4_User_Admin extends Model_User {
-	protected $_override_properties = array(
-		'_rules' => array(
-			// remove the validation for password and password_confirm as we'll be a callback instead because we need to check if the values have been passed
-			'password' => array(),
-			'password_confirm' => array(),
-		),
+	protected function _initialize() {
+		// remove the validation for password and password_confirm as we'll be a callback instead because we need to check if the values have been passed
+		unset($this->_rules['password'], $this->_rules['password_confirm']);
 
-		'_callbacks' => array(
-			// add a callback to check the password
-			'password' => array('check_password'),
-		),
+		// add a callback to check the password
+		$this->_callbacks['password'] = array('check_password');
 
-		'_table_columns' => array(
-			'password' => array(
-				'field_type' => 'password',
-				'list_flag' => FALSE,
-				'edit_flag' => TRUE,
-			),
-			'password_confirm' => array(
-				'field_type' => 'password',
-				'edit_flag' => TRUE,
-			),
-		),
-		'_display_order' => array(
-			45 => 'password_confirm',
-		),
-	);
+		$this->_table_columns['password']['field_type'] = 'password';
+		$this->_table_columns['password']['list_flag'] = FALSE;
+		$this->_table_columns['password']['edit_flag'] = TRUE;
+		$this->_table_columns['password_confirm'] = array(
+			'field_type' => 'password',
+			'edit_flag' => TRUE,
+		);
+
+		$this->_display_order[45] = 'password_confirm';
+	}
 } // class

@@ -1,38 +1,15 @@
 <?php defined('SYSPATH') or die ('No direct script access.');
 
 class Model_cl4_User_Password extends Model_User {
-	protected $_override_properties = array(
-		'_table_columns' => array(
-			'id' => array(
-				'edit_flag' => FALSE,
-			),
-			'active_flag' => array(
-				'edit_flag' => FALSE,
-			),
-			'username' => array(
-				'edit_flag' => FALSE,
-			),
-			'first_name' => array(
-				'edit_flag' => FALSE,
-			),
-			'last_name' => array(
-				'edit_flag' => FALSE,
-			),
-			'login_count' => array(
-				'edit_flag' => FALSE,
-			),
-			'last_login' => array(
-				'edit_flag' => FALSE,
-			),
-			'failed_login_count' => array(
-				'edit_flag' => FALSE,
-			),
-			'last_failed_login' => array(
-				'edit_flag' => FALSE,
-			),
-			'reset_token' => array(
-				'edit_flag' => FALSE,
-			),
-		),
-	);
+	protected function _initialize() {
+		$this->_table_columns['id']['edit_flag'] = FALSE;
+		$this->_table_columns['active_flag']['edit_flag'] = FALSE;
+		$this->_table_columns['username']['edit_flag'] = FALSE;
+		$this->_table_columns['first_name']['edit_flag'] = FALSE;
+		$this->_table_columns['last_name']['edit_flag'] = FALSE;
+		$this->_table_columns['login_count']['edit_flag'] = FALSE;
+		$this->_table_columns['failed_login_count']['edit_flag'] = FALSE;
+		$this->_table_columns['last_failed_login']['edit_flag'] = FALSE;
+		$this->_table_columns['reset_token']['edit_flag'] = FALSE;
+	}
 } // class
