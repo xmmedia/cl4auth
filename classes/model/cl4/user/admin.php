@@ -2,6 +2,8 @@
 
 class Model_cl4_User_Admin extends Model_User {
 	protected function _initialize() {
+		parent::_initialize();
+
 		// remove the validation for password and password_confirm as we'll be a callback instead because we need to check if the values have been passed
 		unset($this->_rules['password'], $this->_rules['password_confirm']);
 

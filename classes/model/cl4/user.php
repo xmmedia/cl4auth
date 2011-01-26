@@ -12,7 +12,7 @@ class Model_cl4_User extends Model_Auth_User {
 		'username' => array(
 			'not_empty'  => NULL,
 			'min_length' => array(6),
-			'max_length' => array(250),
+			'max_length' => array(200),
 			'email'      => NULL,
 		),
 		'first_name' => array(
@@ -87,6 +87,9 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'maxlength'  => 100,
+			),
 		),
 		'password' => array(
 			'field_type'     => 'password',
@@ -103,6 +106,9 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'maxlength'  => 100,
+			),
 		),
 		'last_name' => array(
 			'field_type'     => 'text',
@@ -111,6 +117,9 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'maxlength'  => 100,
+			),
 		),
 		'active_flag' => array(
 			'field_type'     => 'checkbox',
