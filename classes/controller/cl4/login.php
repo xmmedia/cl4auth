@@ -39,7 +39,7 @@ class Controller_cl4_Login extends Controller_Base {
 		// load recaptcha
 		// do this here because there are likely to be a lot of accesses to this action that will never make it to here
 		// loading it here will save server time finding (searching) and loading recaptcha
-		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
+		Kohana::load(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
 
 		// put the post in another var so we don't change it to a validate object in login()
 		$validate = $_POST;
@@ -243,7 +243,7 @@ class Controller_cl4_Login extends Controller_Base {
 	* A basic implementation of the "Forgot password" functionality
 	*/
 	public function action_forgot() {
-		require_once(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
+		Kohana::load(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
 
 		$default_options = Kohana::config('cl4login');
 
