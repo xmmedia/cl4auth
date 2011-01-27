@@ -264,7 +264,7 @@ class Controller_cl4_Login extends Controller_Base {
 			// Admin passwords cannot be reset by email
 			if ($captcha_received && $resp->is_valid && $user->loaded() && ! in_array($user->username, $default_options['admin_accounts'])) {
 				// send an email with the account reset token
-				$user->reset_token = cl4_Auth::generate_password(32);
+				$user->reset_token = Text::random('alnum', 32);
 				$user->save();
 
 				try {

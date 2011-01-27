@@ -302,32 +302,14 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	}
 
 	/**
-	* Generates a random password without any special characters (only alpha numeric) $length characters long
-	* Won't include characters i L O 0 (zero) 1 (one) q to avoid confusion
+	* Generates a random password without any characters that can be confused $length characters long
 	*
-	* @param      int         $length             the length to generate
-	* @param      bool        $letters_only        only use letters, no numbers
+	* @param  int  $length  the length to generate
 	*
-	* @return     string      The random password
+	* @return  string  The random password
 	*/
-	public static function generate_password($length = 7, $letters_only = FALSE) {
-		// abcdefghijkmnprstuvwxyz  <-- allowed
-		// 23456789  <-- allowed
-		// loq01  <-- skipped
-
-		$allowed = 'abcdefghijkmnprstuvwxyzABCDEFGHJKLMNPQRSTUVXYZ';
-		if ( ! $letters_only) $allowed .= '23456789';
-
-		$allowed = str_split($allowed);
-
-		$max_random = count($allowed) - 1;
-		$password = '';
-
-		for ($i = 0; $i < $length; $i ++) {
-			$password .= $allowed[mt_rand(0, $max_random)];
-		}
-
-		return $password;
+	public static function generate_password($length = 7) {
+		return Text::random('distinct', $length);
 	} // function
 
 	/**
@@ -338,6 +320,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	* Removes the login session key
 	*
 	* @param   object  user ORM object
+	*
 	* @return  void
 	*/
 	protected function complete_login($user) {
