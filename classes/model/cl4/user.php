@@ -5,14 +5,13 @@ class Model_cl4_User extends Model_Auth_User {
 	protected $_table_name = 'user';
 	public $_table_name_display = 'User';
 	protected $_primary_val = 'username'; // default: name (column used as primary value)
-	// see http://v3.kohanaphp.com/guide/api/Database_MySQL#list_columns for all possible column attributes
 
 	// Validation rules
 	protected $_rules = array(
 		'username' => array(
 			'not_empty'  => NULL,
 			'min_length' => array(6),
-			'max_length' => array(250),
+			'max_length' => array(200),
 			'email'      => NULL,
 		),
 		'first_name' => array(
@@ -87,6 +86,9 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'maxlength'  => 100,
+			),
 		),
 		'password' => array(
 			'field_type'     => 'password',
@@ -103,6 +105,9 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'maxlength'  => 100,
+			),
 		),
 		'last_name' => array(
 			'field_type'     => 'text',
@@ -111,6 +116,9 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'maxlength'  => 100,
+			),
 		),
 		'active_flag' => array(
 			'field_type'     => 'checkbox',
@@ -192,6 +200,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'through'     => 'user_group',
 			'far_key'     => 'group_id',
 			'foreign_key' => 'user_id',
+			'field_label' => 'Permission Groups',
 		),
 		'auth_log' => array(
 			'model'       => 'auth_log',
@@ -225,6 +234,7 @@ class Model_cl4_User extends Model_Auth_User {
 		120 => 'reset_token',
 		130 => 'force_update_password_flag',
 		140 => 'force_update_profile_flag',
+		150 => 'group',
 	);
 
 	// Stores the failed login count before a login attempt. Set in login()

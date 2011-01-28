@@ -2,6 +2,8 @@
 
 class Model_cl4_User_Password extends Model_User {
 	protected function _initialize() {
+		parent::_initialize();
+
 		$this->_table_columns['id']['edit_flag'] = FALSE;
 		$this->_table_columns['active_flag']['edit_flag'] = FALSE;
 		$this->_table_columns['username']['edit_flag'] = FALSE;
