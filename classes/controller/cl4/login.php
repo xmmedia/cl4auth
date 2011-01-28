@@ -3,6 +3,12 @@
 class Controller_cl4_Login extends Controller_Base {
 	public $page = 'login';
 
+	public function before() {
+		parent::before();
+
+		$this->add_admin_css();
+	} // function before
+
 	/**
 	* View: Login form.
 	*/

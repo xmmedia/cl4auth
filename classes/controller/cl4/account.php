@@ -10,6 +10,12 @@ class Controller_cl4_Account extends Controller_Base {
 	*/
 	public $auth_required = TRUE;
 
+	public function before() {
+		parent::before();
+
+		$this->add_admin_css();
+	} // function before
+
 	/**
 	* By default go the profile
 	* If the user is not logged in, this will then redirect to the login page
