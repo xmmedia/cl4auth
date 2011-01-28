@@ -19,5 +19,8 @@ class Model_cl4_User_Admin extends Model_User {
 		);
 
 		$this->_display_order[45] = 'password_confirm';
+
+		$this->_has_many['group']['edit_flag'] = TRUE;
+		$this->_has_many['group']['view_flag'] = TRUE;
 	}
 } // class

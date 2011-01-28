@@ -200,6 +200,7 @@ class Model_cl4_User extends Model_Auth_User {
 			'through'     => 'user_group',
 			'far_key'     => 'group_id',
 			'foreign_key' => 'user_id',
+			'field_label' => 'Permission Groups',
 		),
 		'auth_log' => array(
 			'model'       => 'auth_log',
@@ -233,6 +234,7 @@ class Model_cl4_User extends Model_Auth_User {
 		120 => 'reset_token',
 		130 => 'force_update_password_flag',
 		140 => 'force_update_profile_flag',
+		150 => 'group',
 	);
 
 	// Stores the failed login count before a login attempt. Set in login()
