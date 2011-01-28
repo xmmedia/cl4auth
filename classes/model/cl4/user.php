@@ -5,7 +5,6 @@ class Model_cl4_User extends Model_Auth_User {
 	protected $_table_name = 'user';
 	public $_table_name_display = 'User';
 	protected $_primary_val = 'username'; // default: name (column used as primary value)
-	// see http://v3.kohanaphp.com/guide/api/Database_MySQL#list_columns for all possible column attributes
 
 	// Validation rules
 	protected $_rules = array(
