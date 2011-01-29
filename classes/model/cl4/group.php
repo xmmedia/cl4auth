@@ -9,8 +9,16 @@ class Model_cl4_Group extends ORM {
 
 	// Relationships
 	protected $_has_many = array(
-		'user' => array('through' => 'user_group', /*'foreign_key' => 'user_id', 'far_key' => 'group_id'*/),
-		'permission' => array('through' => 'group_permission', /*'foreign_key' => 'permission_id', 'far_key' => 'group_id'*/),
+		'user' => array(
+			'through' => 'user_group',
+			'far_key' => 'user_id',
+			'foreign_key' => 'group_id',
+		),
+		'permission' => array(
+			'through' => 'group_permission',
+			'far_key' => 'permission_id',
+			'foreign_key' => 'group_id',
+		),
 	);
 
 	// Validation rules
