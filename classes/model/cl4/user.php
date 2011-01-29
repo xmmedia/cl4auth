@@ -237,8 +237,20 @@ class Model_cl4_User extends Model_Auth_User {
 		150 => 'group',
 	);
 
-	// Stores the failed login count before a login attempt. Set in login()
+	/**
+	* @var  int  Stores the failed login count before a login attempt. Set in login()
+	*/
 	public $_failed_login_count;
+
+	/**
+	* @var  array  The user's current settings. These are only set the first time they are requested for that user.
+	*/
+	protected $_settings;
+
+	/**
+	* @var  array  The default settings. When the user has not set the setting, the default will be used
+	*/
+	protected $_default_settings = array();
 
 	/**
 	* Validates login information from the passed array. Includes checking for too many failed login attempts and recording of login attempts (successful or otherwise).
@@ -561,4 +573,82 @@ class Model_cl4_User extends Model_Auth_User {
 			unset($this->_changed[$field]);
 		}
 	} // function check_password
+
+	/**
+	* Sets or retrieves a setting.
+	* To use this function, a "settings" field must be in the user table.
+	* To get a value, do the following:
+	*
+	*     $setting = $user->setting('path.to.setting');
+	*
+	* To set a value, do the following:
+	*
+	*     $user->setting('path.to.setting', $value);
+	*
+	* @param   string  $setting  Dot separated path to the setting
+	* @param   mixed   $value    The value to set (not required when getting a setting)
+	*
+	* @chainable
+	* @return  ORM    When setting a value, the function returns the object. When getting a setting, it returns the value.
+	* @return  mixed  When retrieving a setting, the setting value is returned.
+	*/
+	public function setting() {
+		// settings have not been unserialized yet
+		if ($this->_settings === NULL) {
+			$this->_settings = unserialize($this->settings);
+
+			if (empty($this->_settings)) {
+				$this->_settings = array();
+			}
+		} // if
+
+		if (func_num_args() == 2) {
+			list($setting, $value) = func_get_args();
+
+			$this->_settings = Arr::set_deep($this->_settings, $setting, $value);
+
+			return $this;
+
+		} else {
+			list($setting) = func_get_args();
+
+			// @todo figure out how this works with values that are null when found, specifically when it's not an array that's found
+			$found_settings = Arr::path($this->_settings, $setting);
+			$default_settings = Arr::path($this->_default_settings, $setting);
+
+			if (is_array($default_settings)) {
+				if (is_array($found_settings)) {
+					return Arr::merge($default_settings, $found_settings);
+				} else {
+					return $default_settings;
+				}
+			} else {
+				return $found_settings;
+			}
+		} // if
+	} // function setting
+
+	/**
+	 * Allows serialization of only the object data and state, to prevent
+	 * "stale" objects being unserialized, which also requires less memory.
+	 * Also serializes and saves the user's settings.
+	 *
+	 * The same as Kohana::__sleep() but we also include the _options array
+	 *
+	 * @return  array
+	 */
+	public function __sleep() {
+		// serialize and save settings
+		if ( ! empty($this->_settings)) {
+			try {
+				$this->settings = serialize($this->_settings);
+				$this->_log_next_query = FALSE;
+				$this->save();
+			} catch (Exception $e) {
+				cl4::exception_handler($e);
+			}
+		} // if
+
+		return parent::__sleep();
+	} // function __sleep
 } // class
