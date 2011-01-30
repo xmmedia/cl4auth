@@ -622,8 +622,10 @@ class Model_cl4_User extends Model_Auth_User {
 				} else {
 					return $default_settings;
 				}
-			} else {
+			} else if ($found_settings !== NULL) {
 				return $found_settings;
+			} else {
+				return $default_settings;
 			}
 		} // if
 	} // function setting
