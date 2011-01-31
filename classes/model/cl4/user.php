@@ -457,6 +457,9 @@ class Model_cl4_User extends Model_Auth_User {
 			return;
 		}
 
+		// don't log the setting of the login count changes
+		$this->_log_next_query = FALSE;
+
 		$this->failed_login_count = 0;
 
 		// Update the number of logins
