@@ -385,7 +385,7 @@ class Model_cl4_User extends Model_Auth_User {
 	*/
 	public function add_auth_log($auth_type, $username = NULL) {
 		$auth_log_data = array(
-			'username' => $username,
+			'username' => ($username !== NULL ? $username : ''),
 			'access_time' => DB::expr("NOW()"),
 			'auth_type_id' => $auth_type,
 			'browser' => ( ! empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : ''),
@@ -456,6 +456,9 @@ class Model_cl4_User extends Model_Auth_User {
 			// nothing to do
 			return;
 		}
+
+		// don't log the setting of the login count changes
+		$this->_log_next_query = FALSE;
 
 		$this->failed_login_count = 0;
 
