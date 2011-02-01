@@ -396,7 +396,7 @@ class Model_cl4_User extends Model_Auth_User {
 			$auth_log_data['username'] = $this->username;
 			$this->add('auth_log', ORM::factory('auth_log'), $auth_log_data);
 		} else {
-			// the user is not valid, so the object doesn't contain an information and screws up because it can't set the user_id
+			// the user is not valid, so the object doesn't contain any information and screws up because it can't set the user_id
 			$auth_log = ORM::factory('auth_log')
 				->values($auth_log_data)
 				->save();
