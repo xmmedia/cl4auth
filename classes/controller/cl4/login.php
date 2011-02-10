@@ -101,7 +101,7 @@ class Controller_cl4_Login extends Controller_Base {
 							$this->login_success_redirect();
 						}
 					} else {
-						// redirect to the user account
+						// redirect to the defualt location (by default this is user account)
 						$this->login_success_redirect();
 					}
 				} // if
