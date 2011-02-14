@@ -21,7 +21,7 @@ class Controller_cl4_Account extends Controller_Base {
 	* If the user is not logged in, this will then redirect to the login page
 	*/
 	public function action_index() {
-		Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
+		Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile')));
 	} // function
 
 	/**
@@ -30,7 +30,7 @@ class Controller_cl4_Account extends Controller_Base {
 	public function action_cancel() {
 		Message::add('Your last action was cancelled.', Message::$notice);
 
-		Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
+		Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile')));
 	}
 
 	/**
@@ -46,33 +46,31 @@ class Controller_cl4_Account extends Controller_Base {
 		$model = ORM::factory('user_profile')->find($user->pk());
 
 		if ( ! empty($_POST) && ! empty($_POST['form']) && $_POST['form'] == 'profile') {
-			$validate = $model->save_values()->validate_profile_edit();
+			try {
+				// store the post values
+				$model->save_values();
+				// the user no longer is forced to update their profile
+				$model->force_update_profile_flag = FALSE;
+				// save first, so that the model has an id when the relationships are added
+				$model->save();
+				// message: profile saved
+				Message::add(__(Kohana::message('account', 'profile_saved')), Message::$notice);
+				// redirect because they have changed their name, which is displayed on the page
+				Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile')));
 
-			// If the post data validates using the rules setup in the user model
-			if ($validate === TRUE) {
-				try {
-					// the user no longer is forced to update their profile
-					$model->force_update_profile_flag = FALSE;
-					// save first, so that the model has an id when the relationships are added
-					$model->save();
-					// message: profile saved
-					Message::add(__(Kohana::message('account', 'profile_saved')), Message::$notice);
-					// redirect because they have changed their name, which is displayed on the page
-					Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
+			} catch (ORM_Validation_Exception $e) {
+				Message::message('account', 'profile_save_validation', array(
+					':validate_errors' => Message::add_validate_errors($model->validation(), 'user')
+				), Message::$error);
 
-				} catch (Exception $e) {
-					cl4::exception_handler($e);
-					Message::add(__(Kohana::message('account', 'profile_save_error')), Message::$error);
-				}
-
-			} else {
-				// Get errors for display in view
-				Message::add(__(Kohana::message('account', 'profile_save_validation')) . Message::add_validate_errors($validate, 'user'), Message::$error);
+			} catch (Exception $e) {
+				cl4::exception_handler($e);
+				Message::add(__(Kohana::message('account', 'profile_save_error')), Message::$error);
 			}
 		} // if
 
 		// use the user loaded from auth to get the user profile model (extends user)
-		$model = ORM::factory('user_profile', $user->pk(), array(
+		$model->set_options(array(
 			'display_reset' => FALSE,
 			'hidden_fields' => array(
 				Form::hidden('form', 'profile'),
@@ -82,7 +80,7 @@ class Controller_cl4_Account extends Controller_Base {
 		// prepare the view & form
 		$this->template->body_html = View::factory('cl4/cl4account/profile')
 			->set('edit_fields', $model->get_form(array(
-				'form_action' => URL::site(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile'))),
+				'form_action' => URL::site(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile'))),
 				'form_id' => 'editprofile',
 			)));
 	} // function action_profile
@@ -97,10 +95,33 @@ class Controller_cl4_Account extends Controller_Base {
 		$user = Auth::instance()->get_user();
 
 		if ( ! empty($_POST) && ! empty($_POST['form']) && $_POST['form'] == 'password') {
-			$validation = $user->validate_change_password($_POST);
+			$model = ORM::factory('user_password', $user->pk());
+			$user_rules = $model->rules();
+			$labels = $model->labels();
+
+			$validation = Validation::factory($_POST)
+				->labels(array(
+					'current_password' => 'Current ' . $labels['password'],
+					'new_password' => 'New ' . $labels['password'],
+					'new_password_confirm' => 'Confirm New ' . $labels['password'],
+				))
+				->rules('current_password', $user_rules['password'])
+				->rules('new_password', $user_rules['password'])
+				->rules('new_password_confirm', array(array('matches', array(':validation', ':field', 'new_password'))));
+			$validation->check();
+			$errors = $validation->errors();
+
+			if (empty($errors)) {
+				if (Auth::instance()->hash((string) $validation['current_password']) !== $user->password) {
+					$validation->error('current_password', 'not_the_same');
+				}
+
+				// repopulate the error array
+				$errors = $validation->errors();
+			}
 
 			// check if there are any errors
-			if (count($validation->errors()) == 0) {
+			if (empty($errors)) {
 				try {
 					$model = ORM::factory('user_password', $user->pk())
 						->values(array(
@@ -113,7 +134,7 @@ class Controller_cl4_Account extends Controller_Base {
 					Message::add(__(Kohana::message('account', 'password_changed')), Message::$notice);
 
 					// redirect and exit
-					Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'profile')));
+					Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile')));
 
 				} catch (Exeception $e) {
 					cl4::exception_handler($e);

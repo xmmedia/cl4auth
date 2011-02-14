@@ -2,8 +2,6 @@
 
 class Model_cl4_User_Profile extends Model_User {
 	protected function _initialize() {
-		parent::_initialize();
-
 		$this->_table_columns['id']['edit_flag'] = FALSE;
 		$this->_table_columns['active_flag']['edit_flag'] = FALSE;
 		$this->_table_columns['password']['edit_flag'] = FALSE;
@@ -14,5 +12,16 @@ class Model_cl4_User_Profile extends Model_User {
 		$this->_table_columns['reset_token']['edit_flag'] = FALSE;
 		$this->_table_columns['force_update_profile_flag']['edit_flag'] = FALSE;
 		$this->_table_columns['force_update_password_flag']['edit_flag'] = FALSE;
-	}
+
+		parent::_initialize();
+	} // function _initialize
+
+	public function rules() {
+		$rules = parent::rules();
+
+		// remove the rules for password (the field is not ediable, see _initialize())
+		unset($rules['password']);
+
+		return $rules;
+	} // function rules
 } // class

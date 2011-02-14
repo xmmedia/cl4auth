@@ -10,28 +10,6 @@ class Model_cl4_Permission extends ORM {
 	// Relationships
 	protected $_has_many = array('group' => array('through' => 'group_permission'));
 
-	// Validation rules
-	protected $_rules = array(
-		'permission' => array(
-			'not_empty'  => NULL,
-			'max_length' => array(255),
-		),
-		'name' => array(
-			'max_length' => array(150),
-		),
-		'description' => array(
-			'max_length' => array(500),
-		),
-	);
-
-	// column labels
-	protected $_labels = array(
-		'id' => 'ID',
-		'permission' => 'Permission',
-		'name' => 'Name',
-		'description' => 'Description',
-	);
-
 	protected $_sorting = array(
 		'name' => 'ASC',
 	);
@@ -76,11 +54,6 @@ class Model_cl4_Permission extends ORM {
 		),
 	);
 
-	// Filters
-	protected $_filters = array(
-		TRUE => array('trim' => array()),
-	);
-
 	/**
 	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
 	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
@@ -91,4 +64,49 @@ class Model_cl4_Permission extends ORM {
 		30 => 'name',
 		40 => 'description',
 	);
+
+	/**
+	 * Rule definitions for validation
+	 *
+	 * @return array
+	 */
+	public function rules() {
+		return array(
+			'permission' => array(
+				'not_empty'  => NULL,
+				'max_length' => array(255),
+			),
+			'name' => array(
+				'max_length' => array(150),
+			),
+			'description' => array(
+				'max_length' => array(500),
+			),
+		);
+	}
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return array
+	 */
+	public function labels() {
+		return array(
+			'id' => 'ID',
+			'permission' => 'Permission',
+			'name' => 'Name',
+			'description' => 'Description',
+		);
+	}
+
+	/**
+	 * Filter definitions, run everytime a field is set
+	 *
+	 * @return array
+	 */
+	public function filters() {
+		return array(
+			TRUE => array('trim' => array()),
+		);
+	}
 } // class

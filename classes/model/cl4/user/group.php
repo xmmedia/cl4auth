@@ -8,13 +8,6 @@ class Model_cl4_User_Group extends ORM {
 	public $_table_name_display = 'User - Group';
 	protected $_primary_val = 'user_id'; // default: name (column used as primary value)
 
-	// column labels
-	protected $_labels = array(
-		'id' => 'ID',
-		'user_id' => 'User',
-		'group_id' => 'Group',
-	);
-
 	// relationships
 	protected $_belongs_to = array(
 		'user' => array(),
@@ -74,4 +67,17 @@ class Model_cl4_User_Group extends ORM {
 		20 => 'user_id',
 		30 => 'group_id',
 	);
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return  array
+	 */
+	public function labels() {
+		return array(
+			'id' => 'ID',
+			'user_id' => 'User',
+			'group_id' => 'Group',
+		);
+	}
 } // class

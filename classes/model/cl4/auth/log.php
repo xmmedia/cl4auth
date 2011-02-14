@@ -9,17 +9,6 @@ class Model_cl4_Auth_Log extends ORM {
 
 	protected $_belongs_to = array('user' => array('model' => 'user'));
 
-	// column labels
-	protected $_labels = array(
-		'id' => 'ID',
-		'user_id' => 'User',
-		'username' => 'Username',
-		'access_time' => 'Access Time',
-		'auth_type_id' => 'Auth Type',
-		'browser' => 'Browser',
-		'ip_address' => 'IP Address',
-	);
-
 	protected $_sorting = array(
 		'access_time' => 'DESC',
 	);
@@ -120,4 +109,21 @@ class Model_cl4_Auth_Log extends ORM {
 		60 => 'browser',
 		70 => 'ip_address',
 	);
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return  array
+	 */
+	public function labels() {
+		return array(
+			'id' => 'ID',
+			'user_id' => 'User',
+			'username' => 'Username',
+			'access_time' => 'Access Time',
+			'auth_type_id' => 'Auth Type',
+			'browser' => 'Browser',
+			'ip_address' => 'IP Address',
+		);
+	}
 } // class Model_cl4_Auth_Log

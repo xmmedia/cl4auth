@@ -6,57 +6,8 @@ class Model_cl4_User extends Model_Auth_User {
 	public $_table_name_display = 'User';
 	protected $_primary_val = 'username'; // default: name (column used as primary value)
 
-	// Validation rules
-	protected $_rules = array(
-		'username' => array(
-			'not_empty'  => NULL,
-			'min_length' => array(6),
-			'max_length' => array(200),
-			'email'      => NULL,
-		),
-		'first_name' => array(
-			'not_empty'  => NULL,
-			'max_length' => array(100),
-		),
-		'last_name' => array(
-			'not_empty'  => NULL,
-			'max_length' => array(100),
-		),
-		'password' => array(
-			// these rules are also in check_password()
-			'not_empty'  => NULL,
-			'min_length' => array(5),
-			'max_length' => array(42),
-		),
-		'password_confirm' => array(
-			// these rules are also in check_password()
-			'matches'    => array('password'),
-		),
-	);
-
-	// as our username is our email address, this removes the callback to check if the email is unique
-	protected $_callbacks = array(
-		'username' => array('username_available'),
-	);
-
-	// column labels
-	protected $_labels = array(
-		'id'                          => 'ID',
-		'expiry_date'                 => 'Date Expired',
-		'username'                    => 'Email (Username)',
-		'password'                    => 'Password',
-		'password_confirm'            => 'Confirm Password',
-		'first_name'                  => 'First Name',
-		'last_name'                   => 'Last Name',
-		'active_flag'                 => 'Active',
-		'login_count'                 => 'Login Count',
-		'last_login'                  => 'Last Login',
-		'failed_login_count'          => 'Failed Login Count',
-		'last_failed_login'           => 'Last Failed Login',
-		'reset_token'                 => 'Reset Password Token',
-		'force_update_password_flag'  => 'Force Password Update',
-		'force_update_profile_flag'   => 'Force Profile Update',
-	);
+	// don't reload the user object every time it's reloaded from the sessions for 2 reasons: (1) it fails, and (2) it's an extra unnecessary query
+	protected $_reload_on_wakeup = FALSE;
 
 	protected $_table_columns = array(
 		/**
@@ -253,110 +204,76 @@ class Model_cl4_User extends Model_Auth_User {
 	protected $_default_settings = array();
 
 	/**
-	* Validates login information from the passed array. Includes checking for too many failed login attempts and recording of login attempts (successful or otherwise).
-	*
-	* ** Special case: if the user's credentials are good (username, password, active, not expired, etc) but they have too many logins
-	* (no check of time) and have not been verified as human, then the function will return TRUE, but they will not be logged in (the session key won't be set).
-	*
-	* @param   array    $login_details    values to check (passed by reference)
-	* @param   string   $redirect         not used: the page to redirect to
-	* @param   boolean  $verified_human   If a check (probably using a captcha) has been done to verify the user is a human
-	* @return  boolean  See special case in comments
-	*/
-	public function login(array & $login_details, $redirect = FALSE, $verified_human = FALSE) {
-		// get the validation object (no checking done)
-		$this->get_login_validate($login_details);
-
-		// Get the remember login option
-		$remember = ! empty($login_details['remember']);
-
-		$auth_types = Kohana::config('cl4login.auth_type');
-
-		// Login starts out invalid
-		$status = FALSE;
-
-		if ($login_details->check()) {
-			// Attempt to load the user, adding the where clause
-			$this->add_login_where($login_details['username'])
-				->find();
-
-			// store the login count so we can use it later to check the number of logins
-			$this->_failed_login_count = $this->failed_login_count;
-
-			// if there are too many recent failed logins, fail now
-			if ($this->_loaded && $this->too_many_login_attempts() && ! $verified_human) {
-				// fail: too many attempted logins
-				$this->increment_failed_login();
-
-				$login_details->error('username', 'too_many_attempts');
-				$auth_type = $auth_types['too_many_attempts'];
-
-			} else {
-				if ($this->_loaded && Auth::instance()->compare_password($this, $login_details['password'])) {
-					$login_config = Kohana::config('cl4login');
-					// check if they have attempted too many times (not matter the time frame) and haven't been verified as human (protection for bots)
-					// return true, as technically they have logged in, but the session key won't be set
-					if ( ! $verified_human && $this->too_many_login_attempts()) {
-						$status = TRUE;
-						$auth_type = $auth_types['verifying_human'];
-
-					// verified as human and not too many fails, so try to fully login
-					} else if (Auth::instance()->login($this, $login_details['password'], $remember)) {
-						// Login is successful
-						$status = TRUE;
-						$auth_type = $auth_types['logged_in'];
-					} else {
-						$this->increment_failed_login();
-						$auth_type = $auth_types['invalid_password'];
-
-						// add a custom message found in message/login.php
-						$login_details->error('username', 'invalid');
-					}
-				} else {
-					// there was a problem logging them in, but set failed counts and date/time or set type to unknown username/password if user doesn't exist
-					if ($this->_loaded) {
-						$this->increment_failed_login();
-						$auth_type = $auth_types['invalid_password'];
-					} else {
-						$auth_type = $auth_types['invalid_username_password'];
-					}
-
-					// add a custom message found in message/login.php
-					$login_details->error('username', 'invalid');
-				} // if
-			} // if
-		} else {
-			$auth_type = $auth_types['invalid_username_password'];
-
-			$this->add_login_where($login_details['username'])
-				->find();
-		} // if
-
-		$this->add_auth_log($auth_type, $login_details['username']);
-
-		return $status;
-	} // function login
+	 * Rule definitions for validation
+	 *
+	 * @return array
+	 */
+	public function rules() {
+		return array(
+			'username' => array(
+				array('not_empty'),
+				array('min_length', array(':value', 6)),
+				array('max_length', array(':value', 200)),
+				array('email'),
+				array(array($this, 'username_available'), array(':validation', ':field')),
+			),
+			'first_name' => array(
+				array('not_empty'),
+				array('max_length', array(':value', 100)),
+			),
+			'last_name' => array(
+				array('not_empty'),
+				array('max_length', array(':value', 100)),
+			),
+			'password' => array(
+				// these rules are also in Model_User_Admin
+				array('not_empty'),
+				// the min length won't have much an affect anywhere because before the rules are run, the filter to hash the password will already have been run
+				// therefore, this is only here so it can be used else where, like the profile edit
+				array('min_length', array(':value', 6)),
+			),
+		);
+	} // function rules
 
 	/**
-	* Adds the values from the login post and creates the Validate object based the rules within the model (user)
-	* $login_details is returned by reference, becoming a Validate object in the function
-	* Doesn't actually do the validation
-	*
-	* @param   array    $login_details    values to check (passed by reference)
-	*
-	* @chainable
-	* @return  ORM
-	*/
-	public function get_login_validate(array & $login_details) {
-		$login_details = Validate::factory($login_details)
-			->label('username', $this->_labels['username'])
-			->label('password', $this->_labels['password'])
-			->filter('username', 'trim')
-			->rules('username', $this->_rules['username'])
-			->rules('password', $this->_rules['password']);
+	 * Labels for columns
+	 *
+	 * @return array
+	 */
+	public function labels() {
+		return array(
+			'id'                          => 'ID',
+			'expiry_date'                 => 'Date Expired',
+			'username'                    => 'Email (Username)',
+			'password'                    => 'Password',
+			'password_confirm'            => 'Confirm Password',
+			'first_name'                  => 'First Name',
+			'last_name'                   => 'Last Name',
+			'active_flag'                 => 'Active',
+			'login_count'                 => 'Login Count',
+			'last_login'                  => 'Last Login',
+			'failed_login_count'          => 'Failed Login Count',
+			'last_failed_login'           => 'Last Failed Login',
+			'reset_token'                 => 'Reset Password Token',
+			'force_update_password_flag'  => 'Force Password Update',
+			'force_update_profile_flag'   => 'Force Profile Update',
+		);
+	} // function labels
 
-		return $this;
-	} // function get_login_validate
+	/**
+	 * Filter definitions, run everytime a field is set
+	 *
+	 * @return array
+	 */
+	public function filters() {
+		return array(
+			'username' => array(array('trim')),
+			'first_name' => array(array('trim')),
+			'last_name' => array(array('trim')),
+			'password' => array(array(array($this, 'hash_password'))),
+			'password_confirm' => array(array(array($this, 'hash_password'))),
+		);
+	} // function filters
 
 	/**
 	* Increments the number of failed login attempts and sets the last failed attempt date/time.
@@ -365,11 +282,13 @@ class Model_cl4_User extends Model_Auth_User {
 	* @return  ORM
 	*/
 	public function increment_failed_login() {
+		$this->_log_next_query = FALSE;
+
 		$this->failed_login_count = DB::expr('failed_login_count + 1');
 		$this->last_failed_login = DB::expr('NOW()');
 		// save and then retrieve the record so the object is updated with the failed count and date
 		$this->save()
-			->find();
+			->reload();
 
 		return $this;
 	} // function increment_failed_login
@@ -393,28 +312,18 @@ class Model_cl4_User extends Model_Auth_User {
 		);
 
 		if ($this->_loaded) {
-			$auth_log_data['username'] = $this->username;
-			$this->add('auth_log', ORM::factory('auth_log'), $auth_log_data);
-		} else {
-			// the user is not valid, so the object doesn't contain any information and screws up because it can't set the user_id
-			$auth_log = ORM::factory('auth_log')
-				->values($auth_log_data)
-				->save();
-		} // if
+			$auth_log_data['user_id'] = $this->pk();
+			if (empty($auth_log_data['username'])) {
+				$auth_log_data['username'] = $this->username;
+			}
+		}
+
+		$auth_log = ORM::factory('auth_log')
+			->values($auth_log_data)
+			->save();
 
 		return $this;
 	} // function add_auth_log
-
-	/**
-	* Determine if the current user has too many login attempts and therefore is required to enter a captcha
-	* Returns TRUE if they do, FALSE if they don't
-	*
-	* @return  boolean
-	*/
-	public function too_many_login_attempts() {
-		$login_config = Kohana::config('cl4login');
-		return (($this->_failed_login_count !== NULL && $this->_failed_login_count > $login_config['max_failed_login_count']) || ($this->failed_login_count > $login_config['max_failed_login_count']));
-	}
 
 	/**
 	* Adds the where clause to the object for login checking
@@ -424,27 +333,11 @@ class Model_cl4_User extends Model_Auth_User {
 	* @return ORM
 	*/
 	public function add_login_where($username) {
-		$this->where('username', '=', $username)
+		$this->where('username', 'LIKE', $username)
 			->where('active_flag', '=', 1);
 
 		return $this;
 	} // function add_login_where
-
-	/**
-	* Logout the user
-	* Records an auth_log record with type logged_out
-	* Performs Auth::logout()
-	*
-	*/
-	public function logout() {
-		$auth_types = Kohana::config('cl4login.auth_type');
-
-		$this->add_auth_log($auth_types['logged_out']);
-
-		// Sign out the user
-		// Passing a TRUE parameter will trigger the logout to delete everything in the session
-		return Auth::instance()->logout();
-	} // function
 
 	/**
 	* Complete the login for a user by incrementing the logins and saving login timestamp
@@ -472,7 +365,7 @@ class Model_cl4_User extends Model_Auth_User {
 		$this->save();
 
 		return $this;
-	} // function
+	} // function complete_login
 
 	/**
 	* Checks to see if the user has the permission assigned to them through groups
@@ -497,85 +390,7 @@ class Model_cl4_User extends Model_Auth_User {
 			->get('total_count');
 
 		return ($rows > 0);
-	} // function
-
-	/**
-	* Add the rules to validate the profile page
-	*
-	* @param 	array	$array	The POST
-	* @return 	object	The validation object
-	*/
-	public function validate_profile_edit() {
-		unset($this->_rules['password'], $this->_rules['password_confirm']);
-
-		return $this->check();
-	} // function
-
-	/**
-	* Add the rules to validate the password change page
-	*
-	* @param 	array	$array	The POST
-	* @return 	object	The validation object
-	*/
-	public function validate_change_password($post) {
-		$validation = Validate::factory($post)
-			->label('current_password', 'Current Password')
-			->label('new_password', 'New Password')
-			->label('new_password_confirm', 'Confirm New Password')
-			->rules('current_password', $this->_rules['password'])
-			->rules('new_password', $this->_rules['password'])
-			->rules('new_password_confirm', array(
-				'matches' => array('new_password')
-			));
-
-		$validation->check();
-
-		if ( ! Auth::instance()->check_password($post['current_password'])) {
-			$validation->error('current_password', 'not_the_same');
-		}
-
-		return $validation;
-	} // function
-
-	/**
-	* Checks the password for an admin page
-	* On admin, there will be 2 fields (likely password and password_confirm) although they do not need to be entered
-	* This will check to see if either of the fields are not empty
-	* If both the fields are empty or not set, then the field will be removed from the _changed array if it's set (ORM_Password sets the field even if it's empty)
-	* If either of the fields have values, then it will create a validation object for these 2 fields, add rules and validate
-	* If there are errors, then it will add the errors to the passed validation object
-	* This function has customized rules that are also in this object
-	*
-	* @param Validate $array
-	* @param string $field
-	*/
-	public function check_password(Validate $array, $field) {
-		if ( ! empty($array[$field]) || ! empty($array[$field . '_confirm'])) {
-			$validation = Validate::factory(array(
-					$field => isset($array[$field]) ? $array[$field] : NULL,
-					$field . '_confirm' => isset($array[$field . '_confirm']) ? $array[$field . '_confirm'] : NULL,
-				))
-				->label('password', $this->_labels['password'])
-				->label($field . '_confirm', $this->_labels[$field . '_confirm'])
-				->rules('password', array(
-					'not_empty'  => NULL,
-					'min_length' => array(5),
-					'max_length' => array(42),
-				))
-				->rules($field . '_confirm', array(
-					'matches' => array('password')
-				));
-
-			if ( ! $validation->check()) {
-				foreach ($validation->errors() as $field => $error) {
-					$array->error($field, $error[0], $error[1]);
-				}
-			}
-
-		} else if (isset($this->_changed[$field])) {
-			unset($this->_changed[$field]);
-		}
-	} // function check_password
+	} // function permission
 
 	/**
 	* Sets or retrieves a setting.
@@ -632,6 +447,50 @@ class Model_cl4_User extends Model_Auth_User {
 			}
 		} // if
 	} // function setting
+
+	/**
+	* Hash the string, but only when the string is not empty
+	* Useful when updating the user, but the password is not being updated even though the field is in the post
+	*
+	* @param   string  $str  The password
+	* @return  string  The hashed password or NULL when no hashing was done
+	*/
+	public function hash_password($str) {
+		if ( ! empty($str)) {
+			return Auth::instance()->hash($str);
+		}
+
+		return NULL;
+	} // function hash_password
+
+	/**
+	* Checks the password for an admin page
+	* On admin, there will be 2 fields (likely password and password_confirm) although they do not need to be entered
+	* This will check to see if either of the fields are not empty
+	* If both the fields are empty or not set, then the field will be removed from the _changed array if it's set (ORM_Password sets the field even if it's empty)
+	* If either of the fields have values, then it will create a validation object for these 2 fields, add rules and validate
+	* If there are errors, then it will add the errors to the passed validation object
+	* This function has customized rules that are also in this object
+	*
+	* @param Validate $array
+	* @param string $field
+	*/
+	public function check_password(Validation $array, $field, $value) {
+		// if there is a changed password_confirm field, remove it as it can't be saved
+		if (array_key_exists($field . '_confirm', $this->_changed)) unset($this->_changed[$field . '_confirm']);
+
+		if ( ! empty($array[$field]) || ! empty($array[$field . '_confirm'])) {
+			if ($array[$field] !== $array[$field . '_confirm']) {
+				$array->error($field, 'check_password');
+				return FALSE;
+			}
+
+		} else {
+			if (array_key_exists($field, $this->_changed)) unset($this->_changed[$field]);
+		}
+
+		return TRUE;
+	} // function check_password
 
 	/**
 	 * Allows serialization of only the object data and state, to prevent

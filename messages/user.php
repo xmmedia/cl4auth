@@ -19,9 +19,9 @@ return array(
 	),
 	'password' => array(
 		'not_empty' => ':field must not be empty.',
-		'min_length' => ':field must be at least :param1 characters long.',
-		'max_length' => ':field must be less than :param1 characters long.',
-		'password_matches' => 'Your passwords need to both be the same.',
+		'min_length' => ':field must be at least :param2 characters long.',
+		'max_length' => ':field must be less than :param2 characters long.',
+		'check_password' => 'Your passwords need to both be the same.',
 	),
 	'update_profile' => 'Before continuing, please update your profile.',
 	'update_password' => 'Before continuing, please change your password.',

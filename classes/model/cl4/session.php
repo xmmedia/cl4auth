@@ -11,14 +11,6 @@ class Model_cl4_Session extends ORM {
 	protected $_primary_val = 'session_id'; // default: name (column used as primary value)
 	public $_table_name_display = 'Session'; // cl4-specific
 
-	// column labels
-	protected $_labels = array(
-		'session_id' => 'Session',
-		'last_active' => 'Last Active',
-		'contents' => 'Contents',
-	);
-
-
 	// column definitions
 	protected $_table_columns = array(
 		/**
@@ -58,4 +50,17 @@ class Model_cl4_Session extends ORM {
 		20 => 'last_active',
 		30 => 'contents',
 	);
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return array
+	 */
+	public function labels() {
+		return array(
+			'session_id'  => 'Session',
+			'last_active' => 'Last Active',
+			'contents'    => 'Contents',
+		);
+	} // function labels
 } // class Model_Session

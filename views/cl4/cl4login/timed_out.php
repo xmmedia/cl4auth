@@ -1,5 +1,5 @@
 <?php
-$logout_uri = Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'logout'));
+$logout_uri = Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'logout'));
 ?>
 <div class="login_box timed_out_wrapper">
 	<h1>Timed Out</h1>

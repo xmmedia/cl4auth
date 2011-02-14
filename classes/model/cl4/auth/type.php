@@ -7,11 +7,10 @@ class Model_cl4_Auth_Type extends ORM {
 	protected $_table_name = 'auth_type';
 	public $_table_name_display = 'Auth Type';
 
-	// column labels
-	protected $_labels = array(
-		'id' => 'ID',
-		'name' => 'Name',
-		'display_order' => 'Display Order',
+	protected $_belongs_to = array(
+		'auth_log' => array(
+			'model' => 'auth_log'
+		)
 	);
 
 	// sorting
@@ -59,12 +58,6 @@ class Model_cl4_Auth_Type extends ORM {
 		),
 	);
 
-	protected $_belongs_to = array(
-		'auth_log' => array(
-			'model' => 'auth_log'
-		)
-	);
-
 	/**
 	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
 	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
@@ -74,4 +67,17 @@ class Model_cl4_Auth_Type extends ORM {
 		20 => 'name',
 		30 => 'display_order',
 	);
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return  array
+	 */
+	public function labels() {
+		return array(
+			'id' => 'ID',
+			'name' => 'Name',
+			'display_order' => 'Display Order',
+		);
+	}
 } // class Model_cl4_Auth_Type

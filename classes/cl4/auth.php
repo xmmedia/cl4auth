@@ -10,29 +10,48 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	protected $permissions = array();
 
 	/**
+	 * Loads Session and configuration options.
+	 * Checks for 3.0.x hashing config option and sets the salt pattern if it's enabled
+	 *
+	 * @return  void
+	 */
+	public function __construct($config = array()) {
+		if ($config['enable_3.0.x_hashing']) {
+			// Clean up the salt pattern and split it into an array
+			$config['salt_pattern'] = preg_split('/,\s*/', Kohana::config('auth')->get('salt_pattern'));
+		}
+
+		parent::__construct($config);
+	} // function __construct
+
+	/**
 	* Checks if a session is active.
 	*
-	* @param   mixed    permission string or array of permissions
+	* @param   mixed    permission string or array of permissions (roles)
 	* @param   boolean  check user for every role applied (TRUE, by default) or if any?
 	* @return  boolean
 	*/
 	public function logged_in($permission = NULL, $all_required = TRUE) {
-		$status = FALSE;
-
 		// Get the user from the session
 		$user = $this->get_user();
 
-		// the session user object is an object, and instance of Model_User and the session has not timed out
-		if (is_object($user) && $user instanceof Model_User && $user->loaded() && ! $this->timed_out()) {
+		if ( ! $user) {
+			return FALSE;
+		}
+
+		// the session user object is an instance of Model_User and the session has not timed out
+		if ($user instanceof Model_User && $user->loaded() && ! $this->timed_out()) {
 			// Everything is okay so far
-			$status = TRUE;
+			if (empty($permission)) {
+				return TRUE;
+			}
 
 			if ( ! empty($permission)) {
-				$status = $this->allowed($permission, NULL, $all_required);
+				return $this->allowed($permission, NULL, $all_required);
 			}
 		}
 
-		return $status;
+		return FALSE;
 	} // function logged_in
 
 	/**
@@ -45,6 +64,10 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	 */
 	public function logout($destroy = FALSE, $logout_all = FALSE) {
 		$this->_session->delete($this->_config['timestamp_key']);
+
+		if ($this->get_user()) {
+			$this->get_user()->add_auth_log(Kohana::config('cl4login.auth_type.logged_out'));
+		}
 
 		return parent::logout($destroy, $logout_all);
 	} // function logout
@@ -153,7 +176,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 		if ( ! is_object($controller)) {
 			// $controller is not an object so we want to try to create the controller to get the permissions from the controller
 			$controller = 'Controller_' . $controller;
-			$controller = new $controller(Request::instance());
+			$controller = new $controller(Request::current());
 		}
 
 		// no auth required
@@ -227,78 +250,149 @@ class cl4_Auth extends Kohana_Auth_ORM {
 			// they have timed out
 			return TRUE;
 		}
-	} // function
+	} // function timed_out
 
 	/**
 	* Updates the session timestamp with the current time (in seconds)
 	*/
 	public function update_timestamp() {
 		Session::instance()->set($this->_config['timestamp_key'], time());
-	} // function
+	} // function update_timestamp
+
+	/**
+	 * Attempt to log in a user by using an ORM object and plain-text password.
+	 *
+	 * @param   string   username to log in
+	 * @param   string   password to check against
+	 * @param   boolean  enable autologin
+	 * @return  boolean  TRUE on success or FALSE on failure
+	 * @return  array    An array of messages meaning there were errors and message that should be displayed; each key in the array is another message and the value is an array, where the first key is the field and the second is the number of attempts
+	 */
+	public function login($username, $password, $remember = FALSE, $verified_human = FALSE) {
+		if (empty($password)) {
+			$user = ORM::factory('user');
+
+			$user->add_auth_log(Kohana::config('cl4login.auth_type.invalid_password'), $username);
+
+			$labels = $user->labels();
+			return array(
+				array('password.not_empty', array(':field' => $labels['password'])),
+			);
+		}
+
+		if (is_string($password)) {
+			if ($this->_config['enable_3.0.x_hashing']) {
+				// Get the salt from the stored password
+				$salt = $this->find_salt($this->password($username));
+
+				// Create a hashed password using the salt from the stored password
+				$password = $this->hash_password($password, $salt);
+			} else {
+				$password = $this->hash($password);
+			}
+		}
+
+		return $this->_login($username, $password, $remember, $verified_human);
+	}
 
 	/**
 	* Logs a user in.
+	* Same as Auth_ORM::_login(), but doesn't check for login role (no role/permission checking)
 	*
 	* @param   string   username
 	* @param   string   password
 	* @param   boolean  enable autologin
-	* @return  boolean
+	* @return  boolean  TRUE on success or FALSE on failure
+	* @return  array    An array of messages meaning there were errors and message that should be displayed; each key in the array is another message and the value is an array, where the first key is the field and the second is the number of attempts
 	*/
-	protected function _login($user, $password, $remember) {
+	protected function _login($user, $password, $remember, $verified_human = FALSE) {
+		$messages = array();
+		$login_config = Kohana::config('cl4login');
+		$auth_types = $login_config['auth_type'];
+
 		if ( ! is_object($user)) {
+			// user is not an object, so it must be the username
 			$username = $user;
 
 			// Load the user
 			$user = ORM::factory('user');
-			$user->where($user->unique_key($username), '=', $username)->find();
+			$user->add_login_where($username)->find();
 		}
 
+		$user_labels = $user->labels();
+
+		// we found a user, but their account has too many login attempts and we haven't verified that they're human
+		if ($user->loaded() && $this->too_many_login_attempts($user->failed_login_count) && ! $verified_human) {
+			// increment the failed login count
+			$user->increment_failed_login();
+
+			// set the session key that forces a captcha
+			$login_session = Session::instance()->get($login_config['session_key'], array());
+			$login_session['force_captcha'] = TRUE;
+			Session::instance()->set($login_config['session_key'], $login_session);
+
+			// add a message and set the auth type for logging
+			$messages[] = array('username.too_many_attempts', array(':field' => $user_labels['username']));
+			$auth_type = $auth_types['too_many_attempts'];
+
 		// If the passwords match, perform a login
-		if ($user->loaded() && $user->password === $password) {
+		} else if ($user->loaded() && $user->password === $password) {
 			if ($remember === TRUE) {
-				$this->remember($user);
+				// Token data
+				$data = array(
+					'user_id'    => $user->id,
+					'expires'    => time() + $this->_config['lifetime'],
+					'user_agent' => sha1(Request::$user_agent),
+				);
+
+				// Create a new autologin token
+				$token = ORM::factory('user_token')
+							->values($data)
+							->create();
+
+				// Set the autologin cookie
+				Cookie::set('authautologin', $token->token, $this->_config['lifetime']);
 			} // if
 
 			// Finish the login
 			$this->complete_login($user);
 
+			// add the auth log entry
+			$user->add_auth_log($auth_types['logged_in'], $username);
+
 			return TRUE;
+
+		// user is loaded, means that the user exists
+		} else if ($user->loaded()) {
+			$user->increment_failed_login();
+			$auth_type = $auth_types['invalid_password'];
+			$messages[] = array('username.invalid', array(':field' => $user_labels['username']));
+
+		// no user loaded, so the username and password must be wrong
+		} else {
+			$auth_type = $auth_types['invalid_username_password'];
+			$messages[] = array('username.invalid', array(':field' => $user_labels['username']));
 		}
 
+		$user->add_auth_log($auth_type, $username);
+
 		// Login failed
-		return FALSE;
+		if ( ! empty($messages)) {
+			return $messages;
+		} else {
+			return FALSE;
+		}
 	} // function _login
 
 	/**
-	* Checks to see if the stored password and the passed password are the same
-	* Any of the automatic query stuff that is applied when find() is run on the user model will also be applied here when retrieving the user (if it's not passed)
+	* Determine if the current user has too many login attempts and therefore is required to enter a captcha
+	* Returns TRUE if they do, FALSE if they don't
 	*
-	* @param  ORM  $user  The user model or the username
-	* @param  string  $password  The password to compare against
 	* @return  boolean
 	*/
-	public function compare_password($user, $password) {
-		if (empty($password)) {
-			return FALSE;
-		}
-
-		if ( ! is_object($user)) {
-			$username = $user;
-
-			// Load the user
-			$user = ORM::factory('user');
-			$user->where($user->unique_key($username), '=', $username)->find();
-		}
-
-		if ($user->loaded() && is_string($password)) {
-			// Get the salt from the stored password
-			$salt = $this->find_salt($this->password($user));
-
-			// Create a hashed password using the salt from the stored password
-			$password = $this->hash_password($password, $salt);
-		}
-
-		return ($user->loaded() && $user->password == $password);
+	public function too_many_login_attempts($failed_login_count) {
+		$login_config = Kohana::config('cl4login');
+		return ($failed_login_count !== NULL && $failed_login_count > $login_config['max_failed_login_count']);
 	}
 
 	/**
@@ -319,16 +413,115 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	* parent::complete_login() should always be called after (or before) as this puts the user model in the session
 	* Removes the login session key
 	*
-	* @param   object  user ORM object
+	* @param   ORM  user ORM object
 	*
 	* @return  void
 	*/
 	protected function complete_login($user) {
 		$this->update_timestamp();
 
-		// delete the session key that contains # of attempts and forced captcha
+		// delete the session key that contains # of attempts and forced captcha flag
 		Session::instance()->delete(Kohana::config('cl4login.session_key'));
 
 		return parent::complete_login($user);
-	} // function
-} // class
+	} // function complete_login
+
+	/**
+	 * Get the stored password for a username.
+	 *
+	 * @param   mixed   username string, or user ORM object
+	 * @return  string
+	 */
+	public function password($user) {
+		if ( ! is_object($user)) {
+			$username = $user;
+
+			// Load the user
+			$user = ORM::factory('user');
+			$user->add_login_where($username)
+				->find();
+		}
+
+		return $user->password;
+	} // function password
+
+	/**
+	 * Perform a hash, using the configured method.
+	 * Optionally uses the Kohana 3.0.x hashing.
+	 * Override this method if you have old passwords under another hashing method.
+	 *
+	 * @param   string  string to hash
+	 * @return  string
+	 */
+	public function hash($str) {
+		if ($this->_config['enable_3.0.x_hashing']) {
+			return hash($this->_config['hash_method'], $str);
+		} else {
+			return parent::hash($str);
+		}
+	} // function hash
+
+	/**
+	 * Creates a hashed password from a plaintext password, inserting salt
+	 * based on the configured salt pattern.
+	 *
+	 * [!!!] For use with passwords generated under Kohana 3.0.x
+	 *
+	 * @param   string  plaintext password
+	 * @return  string  hashed password string
+	 */
+	public function hash_password($password, $salt = FALSE) {
+		if ($salt === FALSE) {
+			// Create a salt seed, same length as the number of offsets in the pattern
+			$salt = substr($this->hash(uniqid(NULL, TRUE)), 0, count($this->_config['salt_pattern']));
+		}
+
+		// Password hash that the salt will be inserted into
+		$hash = $this->hash($salt.$password);
+
+		// Change salt to an array
+		$salt = str_split($salt, 1);
+
+		// Returned password
+		$password = '';
+
+		// Used to calculate the length of splits
+		$last_offset = 0;
+
+		foreach ($this->_config['salt_pattern'] as $offset) {
+			// Split a new part of the hash off
+			$part = substr($hash, 0, $offset - $last_offset);
+
+			// Cut the current part out of the hash
+			$hash = substr($hash, $offset - $last_offset);
+
+			// Add the part to the password, appending the salt character
+			$password .= $part.array_shift($salt);
+
+			// Set the last offset to the current offset
+			$last_offset = $offset;
+		}
+
+		// Return the password, with the remaining hash appended
+		return $password.$hash;
+	} // function hash_password
+
+	/**
+	 * Finds the salt from a password, based on the configured salt pattern.
+	 *
+	 * [!!!] For use with passwords generated under Kohana 3.0.x
+	 *
+	 * @param   string  hashed password
+	 * @return  string
+	 */
+	public function find_salt($password) {
+		$salt = '';
+
+		foreach ($this->_config['salt_pattern'] as $i => $offset) {
+			// Find salt characters, take a good long look...
+			$salt .= substr($password, $offset + $i, 1);
+		}
+
+		return $salt;
+	} // function find_salt
+} // class cl4_Auth

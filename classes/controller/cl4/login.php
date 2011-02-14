@@ -16,19 +16,17 @@ class Controller_cl4_Login extends Controller_Base {
 		// set the template title (see Controller_App for implementation)
 		$this->template->page_title = 'Login';
 
-		// If user already signed-in
-		if (Auth::instance()->logged_in() === TRUE){
-			// redirect to the user account
-			$this->login_success_redirect();
-		}
-
 		// get some variables from the request
+		$username = cl4::get_param('username');
+		$password = cl4::get_param('password');
 		$timed_out = cl4::get_param('timed_out');
 		$redirect = cl4::get_param('redirect', '');
 
-		// repare the view
-		$login_view = View::factory('cl4/cl4login/login')
-			->set('redirect', $redirect);
+		// If user already signed-in
+		if (Auth::instance()->logged_in() === TRUE){
+			// redirect to the default login location or the redirect location
+			$this->login_success_redirect($redirect);
+		}
 
 		$login_config = Kohana::config('cl4login');
 
@@ -47,42 +45,41 @@ class Controller_cl4_Login extends Controller_Base {
 		// loading it here will save server time finding (searching) and loading recaptcha
 		Kohana::load(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
 
-		// put the post in another var so we don't change it to a validate object in login()
-		$validate = $_POST;
-		// $_POST/$validate is not empty
-		if ( ! empty($validate)) {
+		// $_POST is not empty
+		if ( ! empty($_POST)) {
 			// If recaptcha was set and is required
-			$captcha_valid = FALSE;
+			$human_verified = FALSE;
 			$captcha_received = FALSE;
-			if ($captcha_required && isset($validate['recaptcha_challenge_field']) && isset($validate['recaptcha_response_field'])) {
+			if ($captcha_required && isset($_POST['recaptcha_challenge_field']) && isset($_POST['recaptcha_response_field'])) {
 				$captcha_received = TRUE;
 				// Test if recaptcha is valid
-				$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $validate['recaptcha_challenge_field'], $validate['recaptcha_response_field']);
-				$captcha_valid = $resp->is_valid;
+				$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
+				$human_verified = $resp->is_valid;
 			} // if
 
-			// Instantiate a new user
-			$user = ORM::factory('user');
+			// if the captcha is required but we have not verified the human
+			if ($captcha_required && ! $human_verified) {
+				// increment the failed login count on the user
+				$user = ORM::factory('user');
+				$user->add_login_where($username)
+					->find();
 
-			// Check Auth
-			// more specifically, username and password fields need to be set.
-			// If the post data validates using the rules setup in the user model
-			// $validate is passed by reference and becomes a Validate object inside login()
-			// if the captcha is required, then also make sure it's valid
-			if (( ! $captcha_required || ($captcha_required && $captcha_valid)) && $user->login($validate, FALSE, $captcha_valid)) {
-				// if the account has more than 5 login attempts and the captcha in invalid (or not received) then go back to the login page and force them to enter a captcha
-				if ($user->too_many_login_attempts() && ! $captcha_valid) {
-					// log out the user because they need to verified as human first
-					$this->session[$login_config['session_key']]['force_captcha'] = TRUE;
-					$captcha_required = TRUE;
+				// increment the login count and record the login attempt
+				if ($user->loaded()) {
+					$user->increment_failed_login();
+				}
 
-				// login is all good, check for redirect
-				} else {
+				$user->add_auth_log(Kohana::config('cl4login.auth_type.too_many_attempts'), $username);
+				Message::message('user', 'recaptcha_not_valid');
+
+			// Check Auth and log the user in if their username and password is valid
+			} else if (($login_messages = Auth::instance()->login($username, $password, FALSE, $human_verified)) === TRUE) {
+					$user = Auth::instance()->get_user();
 					// user has to update their profile or password
 					if ($user->force_update_profile_flag || $user->force_update_password_flag) {
 						// add a message for the user regarding updating their profile or password
 						$message_path = $user->force_update_profile_flag ? 'update_profile' : 'update_password';
-						Message::add(Kohana::message('user', $message_path), Message::$notice);
+						Message::message('user', $message_path, Message::$notice);
 
 						// instead of redirecting them to the location they requested, redirect them to the profile page
 						$redirect = Route::get('account')->uri(array('action' => 'profile'));
@@ -91,9 +88,9 @@ class Controller_cl4_Login extends Controller_Base {
 					if ( ! empty($redirect) && is_string($redirect)) {
 						// Redirect after a successful login, but check permissions first
 						$redirect_request = Request::factory($redirect);
-						$next_controller = 'Controller_' . $redirect_request->controller;
-						$next_controller = new $next_controller($redirect_request);
-						if (Auth::instance()->allowed($next_controller, $redirect_request->action)) {
+						$next_controller = 'Controller_' . $redirect_request->controller();
+						$next_controller = new $next_controller($redirect_request, Response::factory());
+						if (Auth::instance()->allowed($next_controller, $redirect_request->action())) {
 							// they have permission to access the page, so redirect them there
 							$this->login_success_redirect($redirect);
 						} else {
@@ -104,46 +101,42 @@ class Controller_cl4_Login extends Controller_Base {
 						// redirect to the defualt location (by default this is user account)
 						$this->login_success_redirect();
 					}
-				} // if
+				//} // if
 
 			// If login failed (captcha and/or wrong credentials)
 			} else {
-				// determine if we should be displaying a recaptcha message
-				if ( ! $captcha_valid && $captcha_received) {
-					$additional_messages = array(__(Kohana::message('user', 'recaptcha_not_valid')));
-				} else if ($captcha_required && ! $captcha_received) {
-					$additional_messages = array(__(Kohana::message('user', 'enter_recaptcha')));
-				} else {
-					$additional_messages = array();
-				}
-
-				// if $validate is not an object, then get the Validate object from user and then do the validation so we can retrieve the errors (other than just missing the captcha)
-				if ( ! is_object($validate)) {
-					$user->get_login_validate($validate);
-					$validate->check();
-				}
-				// Get errors for display in view and set the username and password to populate the fields (makes it easier for the user)
-				Message::add(Message::add_validate_errors($validate, 'user', $additional_messages), Message::$error);
-
-				// determine if we have to display the captcha because the account they attempted to access has too many attempts
-				if ($user->loaded() && $user->too_many_login_attempts()) {
-					$this->session[$login_config['session_key']]['force_captcha'] = TRUE;
+				// force captcha may have changed within Auth::login()
+				$force_captcha = Arr::path($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
+				if ( ! $captcha_required && $force_captcha) {
 					$captcha_required = TRUE;
+				}
+
+				if ( ! empty($login_messages)) {
+					foreach ($login_messages as $message_data) {
+						list($message, $values) = $message_data;
+						Message::message('user', $message, $values, Message::$error);
+					}
+				}
+
+				// determine if we should be displaying a recaptcha message
+				if ( ! $human_verified && $captcha_received) {
+					Message::message('user', 'recaptcha_not_valid', array(), Message::$error);
+				} else if ($captcha_required && ! $captcha_received) {
+					Message::message('user', 'enter_recaptcha', array(), Message::$error);
 				}
 			} // if
 		} // if $validate
 
 		if ( ! empty($timed_out)) {
 			// they have come from the timeout page, so send them back there
-			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'timedout')) . $this->get_redirect_query());
+			Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'timedout')) . $this->get_redirect_query());
 		}
 
-		// set the user name and password in the view so the fields can be populated (makes logging in easier)
-		$login_view->set('username', ( ! empty($validate['username']) ? $validate['username'] : cl4::get_param('username')));
-		$login_view->set('password', ( ! empty($validate['password']) ? $validate['password'] : ''));
-		$login_view->set('add_captcha', $captcha_required);
-
-		$this->template->body_html = $login_view;
+		$this->template->body_html = View::factory('cl4/cl4login/login')
+			->set('redirect', $redirect)
+			->set('username', $username)
+			->set('password', $password)
+			->set('add_captcha', $captcha_required);
 	} // function
 
 	/**
@@ -156,10 +149,10 @@ class Controller_cl4_Login extends Controller_Base {
 	*/
 	protected function login_success_redirect($redirect = NULL) {
 		if ($redirect !== NULL) {
-			Request::instance()->redirect($redirect);
+			Request::current()->redirect($redirect);
 		} else {
 			$auth_config = Kohana::config('auth');
-			Request::instance()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
+			Request::current()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
 		}
 	} // function login_success_redirect
 
@@ -168,16 +161,12 @@ class Controller_cl4_Login extends Controller_Base {
 	*/
 	public function action_logout() {
 		try {
-			if (Auth::instance()->get_user()) {
-				if ( ! Auth::instance()->get_user()->logout()) {
-					throw new Kohana_Exception('There was a problem logging out the user');
-				}
-
+			if (Auth::instance()->logout()) {
 				Message::add(__(Kohana::message('user', 'username.logged_out')), Message::$notice);
 			} // if
 
 			// redirect to the user account and then the signin page if logout worked as expected
-			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri() . $this->get_redirect_query());
+			Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri() . $this->get_redirect_query());
 		} catch (Exception $e) {
 			cl4::exception_handler($e);
 			Message::add(__(Kohana::message('user', 'username.not_logged_out')), Message::$error);
@@ -185,7 +174,7 @@ class Controller_cl4_Login extends Controller_Base {
 			if ( ! cl4::is_dev()) {
 				// redirect them to the default page
 				$auth_config = Kohana::config('auth');
-				Request::instance()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
+				Request::current()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
 			}
 		} // try
 	} // function action_logout
@@ -204,7 +193,7 @@ class Controller_cl4_Login extends Controller_Base {
 
 		if ( ! $user || ($max_lifetime > 0 && Auth::instance()->timed_out($max_lifetime))) {
 			// user is not logged in at all or they have reached the maximum amount of time we allow sometime to stay logged in, so redirect them to the login page
-			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'logout')) . $this->get_redirect_query());
+			Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'logout')) . $this->get_redirect_query());
 		}
 
 		$this->template->page_title = 'Timed Out';
@@ -280,10 +269,10 @@ class Controller_cl4_Login extends Controller_Base {
 					$mail->Subject = LONG_NAME . ' Password Reset';
 
 					// build a link with action reset including their username and the reset token
-					$url = URL::site(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'reset')) . '?' . http_build_query(array(
+					$url = URL::site(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'reset')) . '?' . http_build_query(array(
 						'username' => $user->username,
 						'reset_token' => $user->reset_token,
-					)), TRUE);
+					)), UTF8::strtolower(Request::current()->protocol()));
 
 					$mail->Body = View::factory('cl4/cl4login/forgot_link')
 						->set('app_name', LONG_NAME)
@@ -350,7 +339,7 @@ class Controller_cl4_Login extends Controller_Base {
 					$mail->Subject = LONG_NAME . ' New Password';
 
 					// provide a link to the user including their username
-					$url = URL::site(Route::get(Route::name(Request::instance()->route))->uri(), TRUE) . '?' . http_build_query(array('username' => $user->username));
+					$url = URL::site(Route::get(Route::name(Request::current()->route()))->uri() . '?' . http_build_query(array('username' => $user->username)), UTF8::strtolower(Request::current()->protocol()));
 
 					$mail->Body = View::factory('cl4/cl4login/forgot_reset')
 						->set('app_name', LONG_NAME)
@@ -368,16 +357,16 @@ class Controller_cl4_Login extends Controller_Base {
 					throw $e;
 				}
 
-				Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri());
+				Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri());
 
 			} else {
 				Message::add(__(Kohana::message('login', 'password_email_username_not_found')), Message::$error);
-				Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'forgot')));
+				Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'forgot')));
 			}
 
 		} else {
 			Message::add(__(Kohana::message('login', 'password_email_partial')), Message::$error);
-			Request::instance()->redirect(Route::get(Route::name(Request::instance()->route))->uri(array('action' => 'forgot')));
+			Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'forgot')));
 		}
 	} // function
 

@@ -6,21 +6,11 @@ class Model_cl4_Group_Permission extends ORM {
 	public $_table_name_display = 'Group - Permission';
 	protected $_primary_val = 'group_id'; // default: name (column used as primary value)
 
-	// column labels
-	protected $_labels = array(
-		'id' => 'ID',
-		'group_id' => 'Group',
-		'permission_id' => 'Permission',
-	);
-
 	// relationships
 	protected $_belongs_to = array(
 		'permission' => array(),
 		'group' => array(),
 	);
-
-	// validation rules
-	protected $_rules = array();
 
 	// column definitions
 	protected $_table_columns = array(
@@ -76,4 +66,17 @@ class Model_cl4_Group_Permission extends ORM {
 		20 => 'group_id',
 		30 => 'permission_id',
 	);
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return  array
+	 */
+	public function labels() {
+		return array(
+			'id' => 'ID',
+			'group_id' => 'Group',
+			'permission_id' => 'Permission',
+		);
+	}
 } // class

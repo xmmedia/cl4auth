@@ -10,18 +10,6 @@ class Model_cl4_User_Token extends ORM {
 	protected $_primary_val = 'user_id'; // default: name (column used as primary value)
 	public $_table_name_display = 'User Token'; // cl4-specific
 
-	// column labels
-	protected $_labels = array(
-		'id' => 'ID',
-		'date_created' => 'Date Created',
-		'date_expired' => 'Date Expired',
-		'user_id' => 'User',
-		'token' => 'Token',
-	);
-
-	// default sorting
-	//protected $_sorting = array();
-
 	// relationships
 	protected $_has_one = array(
 		'user' => array(
@@ -88,4 +76,19 @@ class Model_cl4_User_Token extends ORM {
 		40 => 'user_id',
 		50 => 'token',
 	);
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return  array
+	 */
+	public function labels() {
+		return array(
+			'id' => 'ID',
+			'date_created' => 'Date Created',
+			'date_expired' => 'Date Expired',
+			'user_id' => 'User',
+			'token' => 'Token',
+		);
+	}
 } // class Model_cl4_User_Token

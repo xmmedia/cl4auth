@@ -19,7 +19,5 @@ return array(
 	),
 
 	// accounts that cannot have their password reset
-	'admin_accounts' => array(
-		'admin@admin.com'
-	),
+	'admin_accounts' => array(),
 );

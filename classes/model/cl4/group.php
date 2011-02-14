@@ -21,21 +21,6 @@ class Model_cl4_Group extends ORM {
 		),
 	);
 
-	// Validation rules
-	protected $_rules = array(
-		'name' => array(
-			'not_empty'  => NULL,
-			'max_length' => array(100),
-		),
-	);
-
-	// column labels
-	protected $_labels = array(
-		'id' => 'ID',
-		'name' => 'Name',
-		'description' => 'Description',
-	);
-
 	protected $_sorting = array(
 		'name' => 'ASC',
 	);
@@ -72,11 +57,6 @@ class Model_cl4_Group extends ORM {
 		),
 	);
 
-	// Filters
-	protected $_filters = array(
-		TRUE => array('trim' => array()),
-	);
-
 	/**
 	 * @var array $_display_order The order to display columns in, if different from as listed in $_table_columns.
 	 * Columns not listed here will be added beneath these columns, in the order they are listed in $_table_columns.
@@ -86,4 +66,42 @@ class Model_cl4_Group extends ORM {
 		20 => 'name',
 		30 => 'display_order',
 	);
+
+	/**
+	 * Rule definitions for validation
+	 *
+	 * @return array
+	 */
+	public function rules() {
+		return array(
+			'name' => array(
+				'not_empty'  => NULL,
+				'max_length' => array(100),
+			),
+		);
+	}
+
+	/**
+	 * Labels for columns
+	 *
+	 * @return array
+	 */
+	public function labels() {
+		return array(
+			'id' => 'ID',
+			'name' => 'Name',
+			'description' => 'Description',
+		);
+	}
+
+	/**
+	 * Filter definitions, run everytime a field is set
+	 *
+	 * @return array
+	 */
+	public function filters() {
+		return array(
+			TRUE => array('trim' => array()),
+		);
+	}
 } // class
