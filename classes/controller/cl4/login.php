@@ -6,7 +6,10 @@ class Controller_cl4_Login extends Controller_Base {
 	public function before() {
 		parent::before();
 
-		$this->add_admin_css();
+		// if we are using cl4base, then we want to add the admin css
+		if (method_exists($this, 'add_admin_css')) {
+			$this->add_admin_css();
+		};
 	} // function before
 
 	/**
