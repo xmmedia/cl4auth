@@ -464,35 +464,6 @@ class Model_cl4_User extends Model_Auth_User {
 	} // function hash_password
 
 	/**
-	* Checks the password for an admin page
-	* On admin, there will be 2 fields (likely password and password_confirm) although they do not need to be entered
-	* This will check to see if either of the fields are not empty
-	* If both the fields are empty or not set, then the field will be removed from the _changed array if it's set (ORM_Password sets the field even if it's empty)
-	* If either of the fields have values, then it will create a validation object for these 2 fields, add rules and validate
-	* If there are errors, then it will add the errors to the passed validation object
-	* This function has customized rules that are also in this object
-	*
-	* @param Validate $array
-	* @param string $field
-	*/
-	public function check_password(Validation $array, $field, $value) {
-		// if there is a changed password_confirm field, remove it as it can't be saved
-		if (array_key_exists($field . '_confirm', $this->_changed)) unset($this->_changed[$field . '_confirm']);
-
-		if ( ! empty($array[$field]) || ! empty($array[$field . '_confirm'])) {
-			if ($array[$field] !== $array[$field . '_confirm']) {
-				$array->error($field, 'check_password');
-				return FALSE;
-			}
-
-		} else {
-			if (array_key_exists($field, $this->_changed)) unset($this->_changed[$field]);
-		}
-
-		return TRUE;
-	} // function check_password
-
-	/**
 	 * Allows serialization of only the object data and state, to prevent
 	 * "stale" objects being unserialized, which also requires less memory.
 	 * Also serializes and saves the user's settings.

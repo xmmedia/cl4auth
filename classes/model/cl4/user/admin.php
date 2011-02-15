@@ -2,12 +2,6 @@
 
 class Model_cl4_User_Admin extends Model_User {
 	protected function _initialize() {
-		// remove the validation for password and password_confirm as we'll be a callback instead because we need to check if the values have been passed
-		//unset($this->_rules['password'], $this->_rules['password_confirm']);
-
-		// add a callback to check the password
-		//$this->_callbacks['password'] = array('check_password');
-
 		$this->_table_columns['password']['field_type'] = 'password';
 		$this->_table_columns['password']['list_flag'] = FALSE;
 		$this->_table_columns['password']['edit_flag'] = TRUE;
@@ -27,11 +21,53 @@ class Model_cl4_User_Admin extends Model_User {
 	public function rules() {
 		$rules = parent::rules();
 
-		// replace the password rules with the custom password setting method
-		$rules['password'] = array(
-			array(array($this, 'check_password'), array(':validation', ':field', ':value')),
-		);
+		// remove the password rules as custom ones are added in save()
+		unset($rules['password']);
 
 		return $rules;
 	} // function rules
+
+	public function filters() {
+		$filters = parent::filters();
+
+		unset($filters['password'], $filters['password_confirm']);
+
+		return $filters;
+	} // function filters
+
+	/**
+	 * Updates or Creates the record depending on loaded()
+	 * Adds validation for the password and password_confirm, using rules from Model_User
+	 *
+	 * @chainable
+	 * @param  Validation $validation Validation object
+	 * @return ORM
+	 */
+	public function save(Validation $validation = NULL) {
+		// if there is a changed password_confirm field, remove it as it can't be saved
+		if (array_key_exists('password_confirm', $this->_changed)) unset($this->_changed['password_confirm']);
+
+		// only do the validation if the password has been sent
+		if ( ! empty($this->password)) {
+			// if there is no validation object passed, then create one, otherwise use the passed on
+			if ($validation === NULL) {
+				$validation = Validation::factory($this->_object);
+			}
+			$labels = $this->labels();
+			$rules = parent::rules(); // get the parent rules, because the rules are modified within this Model
+			// add the validation labels and rules
+		    $validation->label('password', $labels['password'])
+		        ->label('password_confirm', $labels['password_confirm'])
+		        ->rules('password', $rules['password'])
+		        ->rule('password_confirm', 'matches', array(':validation', 'password', 'password_confirm'));
+
+		    // since the password was received, hash it (the data in validation will be kept separate)
+		    $this->password = $this->hash_password($this->password);
+
+		} else if (array_key_exists('password', $this->_changed)) {
+			 unset($this->_changed['password']);
+		}
+
+		return parent::save($validation);
+	} // function save
 } // class
