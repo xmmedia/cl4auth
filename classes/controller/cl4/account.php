@@ -55,6 +55,10 @@ class Controller_cl4_Account extends Controller_Base {
 				$model->save();
 				// message: profile saved
 				Message::add(__(Kohana::message('account', 'profile_saved')), Message::$notice);
+
+				// reload the user in the session
+				Auth::instance()->get_user()->reload();
+
 				// redirect because they have changed their name, which is displayed on the page
 				Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile')));
 
@@ -132,6 +136,9 @@ class Controller_cl4_Account extends Controller_Base {
 						->save();
 
 					Message::add(__(Kohana::message('account', 'password_changed')), Message::$notice);
+
+					// reload the user in the session
+					Auth::instance()->get_user()->reload();
 
 					// redirect and exit
 					Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile')));
