@@ -60,7 +60,7 @@ class Controller_cl4_Account extends Controller_Base {
 
 			} catch (ORM_Validation_Exception $e) {
 				Message::message('account', 'profile_save_validation', array(
-					':validate_errors' => Message::add_validate_errors($model->validation(), 'user')
+					':validation_errors' => Message::add_validation_errors($model->validation(), 'user')
 				), Message::$error);
 
 			} catch (Exception $e) {
@@ -142,7 +142,7 @@ class Controller_cl4_Account extends Controller_Base {
 				}
 
 			} else {
-				Message::add(__(Kohana::message('account', 'password_change_validation')) . Message::add_validate_errors($validation, 'account'), Message::$error);
+				Message::add(__(Kohana::message('account', 'password_change_validation')) . Message::add_validation_errors($validation, 'account'), Message::$error);
 			}
 		} // if
 

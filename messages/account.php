@@ -1,11 +1,11 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-// see /system/messages/validate.php for the defaults for each rule. These can be overridden on a per-field basis.
+// see /system/messages/validation.php for the defaults for each rule. These can be overridden on a per-field basis.
 return array(
 	// profile edit
 	'profile_saved' => 'Your profile has been saved.',
 	'profile_save_error' => 'There was a problem saving your profile. Please try again.',
-	'profile_save_validation' => 'Your profile could not be saved because of the following: :validate_errors',
+	'profile_save_validation' => 'Your profile could not be saved because of the following: :validation_errors',
 	// password update
 	'new_password' => array(
 		'not_empty' => 'Your new password cannot be empty.',

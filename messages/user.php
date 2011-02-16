@@ -3,7 +3,7 @@
 /**
 * These messages are for the user model (including user_profile and user_password)
 *
-* see /system/messages/validate.php for the defaults for each rule. These can be overridden on a per-field/message basis.
+* see /system/messages/validation.php for the defaults for each rule. These can be overridden on a per-field/message basis.
 */
 return array(
 	'username' => array(

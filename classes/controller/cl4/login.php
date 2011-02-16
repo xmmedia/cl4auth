@@ -128,7 +128,7 @@ class Controller_cl4_Login extends Controller_Base {
 					Message::message('user', 'enter_recaptcha', array(), Message::$error);
 				}
 			} // if
-		} // if $validate
+		} // if $_POST
 
 		if ( ! empty($timed_out)) {
 			// they have come from the timeout page, so send them back there
