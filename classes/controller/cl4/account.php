@@ -111,7 +111,7 @@ class Controller_cl4_Account extends Controller_Base {
 				))
 				->rules('current_password', $user_rules['password'])
 				->rules('new_password', $user_rules['password'])
-				->rules('new_password_confirm', array(array('matches', array(':validation', 'password', 'new_password'))));
+				->rules('new_password_confirm', array(array('matches', array(':validation', 'new_password', 'new_password_confirm'))));
 			$validation->check();
 			$errors = $validation->errors();
 
