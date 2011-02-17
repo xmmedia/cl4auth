@@ -106,7 +106,7 @@ class Model_cl4_Permission extends ORM {
 	 */
 	public function filters() {
 		return array(
-			TRUE => array('trim' => array()),
+			TRUE => array(array('trim')),
 		);
 	}
 } // class
