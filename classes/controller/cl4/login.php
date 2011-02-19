@@ -275,7 +275,7 @@ class Controller_cl4_Login extends Controller_Base {
 					$url = URL::site(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'reset')) . '?' . http_build_query(array(
 						'username' => $user->username,
 						'reset_token' => $user->reset_token,
-					)), UTF8::strtolower(Request::current()->protocol()));
+					)), Request::current()->protocol());
 
 					$mail->Body = View::factory('cl4/cl4login/forgot_link')
 						->set('app_name', LONG_NAME)
@@ -342,7 +342,7 @@ class Controller_cl4_Login extends Controller_Base {
 					$mail->Subject = LONG_NAME . ' New Password';
 
 					// provide a link to the user including their username
-					$url = URL::site(Route::get(Route::name(Request::current()->route()))->uri() . '?' . http_build_query(array('username' => $user->username)), UTF8::strtolower(Request::current()->protocol()));
+					$url = URL::site(Route::get(Route::name(Request::current()->route()))->uri() . '?' . http_build_query(array('username' => $user->username)), Request::current()->protocol());
 
 					$mail->Body = View::factory('cl4/cl4login/forgot_reset')
 						->set('app_name', LONG_NAME)
