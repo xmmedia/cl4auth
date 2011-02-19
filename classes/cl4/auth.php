@@ -455,7 +455,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	 */
 	public function hash($str) {
 		if ($this->_config['enable_3.0.x_hashing']) {
-			return hash($this->_config['hash_method'], $str);
+			return $this->hash_password($str);
 		} else {
 			return parent::hash($str);
 		}
@@ -473,11 +473,11 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	public function hash_password($password, $salt = FALSE) {
 		if ($salt === FALSE) {
 			// Create a salt seed, same length as the number of offsets in the pattern
-			$salt = substr($this->hash(uniqid(NULL, TRUE)), 0, count($this->_config['salt_pattern']));
+			$salt = substr(hash($this->_config['hash_method'], uniqid(NULL, TRUE)), 0, count($this->_config['salt_pattern']));
 		}
 
 		// Password hash that the salt will be inserted into
-		$hash = $this->hash($salt.$password);
+		$hash = hash($this->_config['hash_method'], $salt.$password);
 
 		// Change salt to an array
 		$salt = str_split($salt, 1);

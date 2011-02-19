@@ -328,7 +328,7 @@ class Controller_cl4_Login extends Controller_Base {
 				try {
 					$password = cl4_Auth::generate_password();
 					$user->password = $password;
-					$user->failed_login_count = 0; // reset the login count
+					$user->failed_login_count = 0; // reset the failed login count
 					$user->save();
 				} catch (Exception $e) {
 					Message::add(__(Kohana::message('login', 'password_email_error')), Message::$error);
