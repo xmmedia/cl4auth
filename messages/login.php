@@ -1,6 +1,7 @@
 <?php defined('SYSPATH') or die ('No direct script access.');
 
 return array(
+	'error' => 'There was a problem logging in or preparing the login form. Please try again.',
 	// forgot password
 	'reset_link_sent' => 'A link to reset your password has been emailed to you.',
 	'reset_send_error' => 'There was a problem sending your password reset link. The administrators have been notified.',

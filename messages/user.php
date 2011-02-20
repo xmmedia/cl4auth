@@ -8,7 +8,7 @@
 return array(
 	'username' => array(
 		'not_empty' => ':field must not be empty.',
-		'invalid' => 'Your :field or password is incorrect.',
+		'invalid' => 'Your username or password is incorrect.',
 		'email' => ':field must be an email address.',
 		'min_length' => ':field must be an email address.',
 		'max_length' => ':field must be an email address.',

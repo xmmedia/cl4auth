@@ -16,119 +16,153 @@ class Controller_cl4_Login extends Controller_Base {
 	* View: Login form.
 	*/
 	public function action_index() {
-		// set the template title (see Controller_App for implementation)
-		$this->template->page_title = 'Login';
+		try {
+			// set the template title (see Controller_App for implementation)
+			$this->template->page_title = 'Login';
 
-		// get some variables from the request
-		$username = cl4::get_param('username');
-		$password = cl4::get_param('password');
-		$timed_out = cl4::get_param('timed_out');
-		$redirect = cl4::get_param('redirect', '');
+			// get some variables from the request
+			$username = cl4::get_param('username');
+			$password = cl4::get_param('password');
+			$timed_out = cl4::get_param('timed_out');
+			$redirect = cl4::get_param('redirect', '');
 
-		// If user already signed-in
-		if (Auth::instance()->logged_in() === TRUE){
-			// redirect to the default login location or the redirect location
-			$this->login_success_redirect($redirect);
+			// If user already signed-in
+			if (Auth::instance()->logged_in() === TRUE){
+				// redirect to the default login location or the redirect location
+				$this->login_success_redirect($redirect);
+			}
+		} catch (Exception $e) {
+			cl4::exception_handler($e);
+			if ( ! cl4::is_dev()) $this->login_success_redirect();
 		}
 
-		$login_config = Kohana::config('cl4login');
+		try {
+			$login_config = Kohana::config('cl4login');
 
-		// Get number of login attempts this session
-		$attempts = Arr::path($this->session, $login_config['session_key'] . '.attempts', 0);
-		$force_captcha = Arr::path($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
+			// Get number of login attempts this session
+			$attempts = Arr::path($this->session, $login_config['session_key'] . '.attempts', 0);
+			$force_captcha = Arr::path($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
 
-		// If more than three login attempts, add a captcha to form
-		$captcha_required = ($force_captcha || $attempts > $login_config['failed_login_captcha_display']);
-		// Update number of login attempts
-		++$attempts;
-		$this->session[$login_config['session_key']]['attempts'] = $attempts;
+			// If more than three login attempts, add a captcha to form
+			$captcha_required = ($force_captcha || $attempts > $login_config['failed_login_captcha_display']);
+			// Update number of login attempts
+			++$attempts;
+			$this->session[$login_config['session_key']]['attempts'] = $attempts;
 
-		// load recaptcha
-		// do this here because there are likely to be a lot of accesses to this action that will never make it to here
-		// loading it here will save server time finding (searching) and loading recaptcha
-		Kohana::load(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
+			// load recaptcha
+			// do this here because there are likely to be a lot of accesses to this action that will never make it to here
+			// loading it here will save server time finding (searching) and loading recaptcha
+			Kohana::load(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
+		} catch (Exception $e) {
+			cl4::exception_handler($e);
+			$this->action_404();
+		}
 
-		// $_POST is not empty
-		if ( ! empty($_POST)) {
-			// If recaptcha was set and is required
-			$human_verified = FALSE;
-			$captcha_received = FALSE;
-			if ($captcha_required && isset($_POST['recaptcha_challenge_field']) && isset($_POST['recaptcha_response_field'])) {
-				$captcha_received = TRUE;
-				// Test if recaptcha is valid
-				$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
-				$human_verified = $resp->is_valid;
-			} // if
-
-			// if the captcha is required but we have not verified the human
-			if ($captcha_required && ! $human_verified) {
-				// increment the failed login count on the user
-				$user = ORM::factory('user');
-				$user->add_login_where($username)
-					->find();
-
-				// increment the login count and record the login attempt
-				if ($user->loaded()) {
-					$user->increment_failed_login();
+		try {
+			// $_POST is not empty
+			if ( ! empty($_POST)) {
+				$human_verified = FALSE;
+				$captcha_received = FALSE;
+				try {
+					// If recaptcha was set and is required
+					if ($captcha_required && isset($_POST['recaptcha_challenge_field']) && isset($_POST['recaptcha_response_field'])) {
+						$captcha_received = TRUE;
+						// Test if recaptcha is valid
+						$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
+						$human_verified = $resp->is_valid;
+					} // if
+				} catch (Exception $e) {
+					cl4::exception_handler($e);
 				}
 
-				$user->add_auth_log(Kohana::config('cl4login.auth_type.too_many_attempts'), $username);
-				Message::message('user', 'recaptcha_not_valid');
+				// if the captcha is required but we have not verified the human
+				if ($captcha_required && ! $human_verified) {
+					try {
+						// increment the failed login count on the user
+						$user = ORM::factory('user');
+						$user->add_login_where($username)
+							->find();
 
-			// Check Auth and log the user in if their username and password is valid
-			} else if (($login_messages = Auth::instance()->login($username, $password, FALSE, $human_verified)) === TRUE) {
-					$user = Auth::instance()->get_user();
-					// user has to update their profile or password
-					if ($user->force_update_profile_flag || $user->force_update_password_flag) {
-						// add a message for the user regarding updating their profile or password
-						$message_path = $user->force_update_profile_flag ? 'update_profile' : 'update_password';
-						Message::message('user', $message_path, Message::$notice);
+						// increment the login count and record the login attempt
+						if ($user->loaded()) {
+							$user->increment_failed_login();
+						}
 
-						// instead of redirecting them to the location they requested, redirect them to the profile page
-						$redirect = Route::get('account')->uri(array('action' => 'profile'));
-					} // if
+						$user->add_auth_log(Kohana::config('cl4login.auth_type.too_many_attempts'), $username);
+						Message::message('user', 'recaptcha_not_valid');
+					} catch (ORM_Validation_Exception $e) {
+						throw $e;
+					} catch (Exception $e) {
+						cl4::exception_handler($e);
+						Message::message('login', 'error');
+					}
 
-					if ( ! empty($redirect) && is_string($redirect)) {
-						// Redirect after a successful login, but check permissions first
-						$redirect_request = Request::factory($redirect);
-						$next_controller = 'Controller_' . $redirect_request->controller();
-						$next_controller = new $next_controller($redirect_request, Response::factory());
-						if (Auth::instance()->allowed($next_controller, $redirect_request->action())) {
-							// they have permission to access the page, so redirect them there
-							$this->login_success_redirect($redirect);
+				// Check Auth and log the user in if their username and password is valid
+				} else if (($login_messages = Auth::instance()->login($username, $password, FALSE, $human_verified)) === TRUE) {
+					try {
+						$user = Auth::instance()->get_user();
+						// user has to update their profile or password
+						if ($user->force_update_profile_flag || $user->force_update_password_flag) {
+							// add a message for the user regarding updating their profile or password
+							$message_path = $user->force_update_profile_flag ? 'update_profile' : 'update_password';
+							Message::message('user', $message_path, Message::$notice);
+
+							// instead of redirecting them to the location they requested, redirect them to the profile page
+							$redirect = Route::get('account')->uri(array('action' => 'profile'));
+						} // if
+
+						if ( ! empty($redirect) && is_string($redirect)) {
+							// Redirect after a successful login, but check permissions first
+							$redirect_request = Request::factory($redirect);
+							$next_controller = 'Controller_' . $redirect_request->controller();
+							$next_controller = new $next_controller($redirect_request, Response::factory());
+							if (Auth::instance()->allowed($next_controller, $redirect_request->action())) {
+								// they have permission to access the page, so redirect them there
+								$this->login_success_redirect($redirect);
+							} else {
+								// they don't have permission to access the page, so just go to the default page
+								$this->login_success_redirect();
+							}
 						} else {
-							// they don't have permission to access the page, so just go to the default page
+							// redirect to the defualt location (by default this is user account)
 							$this->login_success_redirect();
 						}
-					} else {
-						// redirect to the defualt location (by default this is user account)
-						$this->login_success_redirect();
+					} catch (ORM_Validation_Exception $e) {
+						throw $e;
+					} catch (Exception $e) {
+						cl4::exception_handler($e);
+						Message::message('login', 'error');
 					}
-				//} // if
 
-			// If login failed (captcha and/or wrong credentials)
-			} else {
-				// force captcha may have changed within Auth::login()
-				$force_captcha = Arr::path($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
-				if ( ! $captcha_required && $force_captcha) {
-					$captcha_required = TRUE;
-				}
-
-				if ( ! empty($login_messages)) {
-					foreach ($login_messages as $message_data) {
-						list($message, $values) = $message_data;
-						Message::message('user', $message, $values, Message::$error);
+				// If login failed (captcha and/or wrong credentials)
+				} else {
+					// force captcha may have changed within Auth::login()
+					$force_captcha = Arr::path($this->session, $login_config['session_key'] . '.force_captcha', FALSE);
+					if ( ! $captcha_required && $force_captcha) {
+						$captcha_required = TRUE;
 					}
-				}
 
-				// determine if we should be displaying a recaptcha message
-				if ( ! $human_verified && $captcha_received) {
-					Message::message('user', 'recaptcha_not_valid', array(), Message::$error);
-				} else if ($captcha_required && ! $captcha_received) {
-					Message::message('user', 'enter_recaptcha', array(), Message::$error);
-				}
-			} // if
-		} // if $_POST
+					if ( ! empty($login_messages)) {
+						foreach ($login_messages as $message_data) {
+							list($message, $values) = $message_data;
+							Message::message('user', $message, $values, Message::$error);
+						}
+					}
+
+					// determine if we should be displaying a recaptcha message
+					if ( ! $human_verified && $captcha_received) {
+						Message::message('user', 'recaptcha_not_valid', array(), Message::$error);
+					} else if ($captcha_required && ! $captcha_received) {
+						Message::message('user', 'enter_recaptcha', array(), Message::$error);
+					}
+				} // if
+			} // if $_POST
+		} catch (ORM_Validation_Exception $e) {
+			cl4::exception_handler($e);
+			Message::message('user', 'username.invalid');
+		} catch (Exception $e) {
+			cl4::exception_handler($e);
+		}
 
 		if ( ! empty($timed_out)) {
 			// they have come from the timeout page, so send them back there
