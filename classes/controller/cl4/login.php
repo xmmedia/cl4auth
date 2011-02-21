@@ -261,7 +261,7 @@ class Controller_cl4_Login extends Controller_Base {
 	*
 	* @return	string
 	*/
-	private function get_redirect_query() {
+	protected function get_redirect_query() {
 		$redirect = cl4::get_param('redirect');
 
 		if ( ! empty($redirect)) {
