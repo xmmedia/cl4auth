@@ -464,6 +464,20 @@ class Model_cl4_User extends Model_Auth_User {
 	} // function hash_password
 
 	/**
+	* Sets the password in the model without hashing it
+	* This is useful if you are copying an existing user
+	*
+	* @param   string  $hash_password  The hash password
+	* @return  ORM
+	*/
+	public function set_hashed_password($hash_password) {
+		$this->_object['password'] = $hash_password;
+		$this->_changed['password'] = 'password';
+
+		return $this;
+	} // function set_hashed_password
+
+	/**
 	 * Allows serialization of only the object data and state, to prevent
 	 * "stale" objects being unserialized, which also requires less memory.
 	 * Also serializes and saves the user's settings.
