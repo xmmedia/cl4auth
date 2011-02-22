@@ -464,7 +464,7 @@ class Controller_cl4_Login extends Controller_Base {
             } catch (Exception $e) {
                 Fire::log('Some other exception occured');
                 Fire::log($e);
-                $this->template->body_html .= 'Could not create user. Error: "' . Kohana::exception_text($e) . '"';
+                $this->template->body_html .= 'Could not create user. Error: "' . Kohana_Exception::text($e) . '"';
                 claero::flash_set('message', 'An error occurred during registration, please try again later.');
 
             } // try
