@@ -393,7 +393,7 @@ class Model_cl4_User extends Model_Auth_User {
 	} // function permission
 
 	/**
-	* Sets or retrieves a setting.
+	* Sets or retrieves a setting.  If the setting does not exist, it is created.
 	* To use this function, a "settings" field must be in the user table.
 	* To get a value, do the following:
 	*
@@ -407,27 +407,36 @@ class Model_cl4_User extends Model_Auth_User {
 	* @param   mixed   $value    The value to set (not required when getting a setting)
 	*
 	* @chainable
-	* @return  ORM    When setting a value, the function returns the object. When getting a setting, it returns the value.
-	* @return  mixed  When retrieving a setting, the setting value is returned.
+	* @return  ORM    When setting a value, the function returns the object or FALSE if we catch an error.
+	* @return  mixed  When retrieving a setting, the setting value is returned or if not set it tries to return the default specified in the model _default_settings.
 	*/
 	public function setting() {
 		// settings have not been unserialized yet
 		if ($this->_settings === NULL) {
 			$this->_settings = unserialize($this->settings);
-
 			if (empty($this->_settings)) {
 				$this->_settings = array();
 			}
 		} // if
 
+		// the 'set' case
 		if (func_num_args() == 2) {
 			list($setting, $value) = func_get_args();
-
-			$this->_settings = Arr::set_deep($this->_settings, $setting, $value);
-
+			// set the new value or create the setting if it does not exist
+			Arr::set_path($this->_settings, $setting, $value, '.');
+			if ( ! empty($this->_settings)) {
+				try {
+					$this->settings = serialize($this->_settings);
+					$this->_log_next_query = FALSE;
+					$this->save();
+				} catch (Exception $e) {
+					cl4::exception_handler($e);
+					return FALSE;
+				}
+			} // if
 			return $this;
-
 		} else {
+			// must be the 'get' case
 			list($setting) = func_get_args();
 
 			// @todo figure out how this works with values that are null when found, specifically when it's not an array that's found
@@ -476,28 +485,4 @@ class Model_cl4_User extends Model_Auth_User {
 
 		return $this;
 	} // function set_hashed_password
-
-	/**
-	 * Allows serialization of only the object data and state, to prevent
-	 * "stale" objects being unserialized, which also requires less memory.
-	 * Also serializes and saves the user's settings.
-	 *
-	 * The same as Kohana::__sleep() but we also include the _options array
-	 *
-	 * @return  array
-	 */
-	public function __sleep() {
-		// serialize and save settings
-		if ( ! empty($this->_settings)) {
-			try {
-				$this->settings = serialize($this->_settings);
-				$this->_log_next_query = FALSE;
-				$this->save();
-			} catch (Exception $e) {
-				cl4::exception_handler($e);
-			}
-		} // if
-
-		return parent::__sleep();
-	} // function __sleep
 } // class
