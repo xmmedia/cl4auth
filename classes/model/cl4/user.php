@@ -425,21 +425,17 @@ class Model_cl4_User extends Model_Auth_User {
 			// set the new value or create the setting if it does not exist
 			Arr::set_path($this->_settings, $setting, $value, '.');
 			if ( ! empty($this->_settings)) {
-				try {
-					$this->settings = serialize($this->_settings);
-					$this->_log_next_query = FALSE;
-					$this->save();
-				} catch (Exception $e) {
-					cl4::exception_handler($e);
-					return FALSE;
-				}
+				$this->settings = serialize($this->_settings);
+				$this->_log_next_query = FALSE;
+				$this->save();
 			} // if
 			return $this;
 		} else {
-			// must be the 'get' case
+			// the 'get' case
 			list($setting) = func_get_args();
 
 			// @todo figure out how this works with values that are null when found, specifically when it's not an array that's found
+			// @todo 20110223 CSN I have not tested this code yet, it was existing code:
 			$found_settings = Arr::path($this->_settings, $setting);
 			$default_settings = Arr::path($this->_default_settings, $setting);
 
