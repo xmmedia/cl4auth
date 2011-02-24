@@ -75,8 +75,8 @@ class Model_cl4_Group extends ORM {
 	public function rules() {
 		return array(
 			'name' => array(
-				'not_empty'  => NULL,
-				'max_length' => array(100),
+				array('not_empty'),
+				array('max_length', array(':value', 100)),
 			),
 		);
 	}

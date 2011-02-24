@@ -73,14 +73,15 @@ class Model_cl4_Permission extends ORM {
 	public function rules() {
 		return array(
 			'permission' => array(
-				'not_empty'  => NULL,
-				'max_length' => array(255),
+				array('not_empty'),
+				array('max_length', array(':value', 255)),
 			),
 			'name' => array(
-				'max_length' => array(150),
+				array('not_empty'),
+				array('max_length', array(':value', 150)),
 			),
 			'description' => array(
-				'max_length' => array(500),
+				array('max_length', array(':value', 500)),
 			),
 		);
 	}
