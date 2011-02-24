@@ -43,7 +43,7 @@ class Controller_cl4_Account extends Controller_Base {
 		// get the current user from auth
 		$user = Auth::instance()->get_user();
 		// use the user loaded from auth to get the user profile model (extends user)
-		$model = ORM::factory('user_profile')->find($user->pk());
+		$model = ORM::factory('user_profile', $user->pk());
 
 		if ( ! empty($_POST) && ! empty($_POST['form']) && $_POST['form'] == 'profile') {
 			try {
