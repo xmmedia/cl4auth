@@ -70,6 +70,7 @@ class Controller_cl4_Login extends Controller_Base {
 						// Test if recaptcha is valid
 						$resp = recaptcha_check_answer(RECAPTCHA_PRIVATE_KEY, $_SERVER['REMOTE_ADDR'], $_POST['recaptcha_challenge_field'], $_POST['recaptcha_response_field']);
 						$human_verified = $resp->is_valid;
+						Message::add('ReCAPTCHA valid: ' . ($human_verified ? 'Yes' : 'No'), Message::$debug);
 					} // if
 				} catch (Exception $e) {
 					cl4::exception_handler($e);

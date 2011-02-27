@@ -367,11 +367,13 @@ class cl4_Auth extends Kohana_Auth_ORM {
 			$user->increment_failed_login();
 			$auth_type = $auth_types['invalid_password'];
 			$messages[] = array('username.invalid', array());
+			Message::add('User found, but password incorrect', Message::$debug);
 
 		// no user loaded, so the username and password must be wrong
 		} else {
 			$auth_type = $auth_types['invalid_username_password'];
 			$messages[] = array('username.invalid', array());
+			Message::add('User not found', Message::$debug);
 		}
 
 		$user->add_auth_log($auth_type, $username);
