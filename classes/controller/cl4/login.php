@@ -106,7 +106,7 @@ class Controller_cl4_Login extends Controller_Base {
 						if ($user->force_update_profile_flag || $user->force_update_password_flag) {
 							// add a message for the user regarding updating their profile or password
 							$message_path = $user->force_update_profile_flag ? 'update_profile' : 'update_password';
-							Message::message('user', $message_path, Message::$notice);
+							Message::message('user', $message_path, array(), Message::$notice);
 
 							// instead of redirecting them to the location they requested, redirect them to the profile page
 							$redirect = Route::get('account')->uri(array('action' => 'profile'));
