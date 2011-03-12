@@ -64,7 +64,7 @@ class Model_cl4_Group extends ORM {
 	protected $_display_order = array(
 		10 => 'id',
 		20 => 'name',
-		30 => 'display_order',
+		30 => 'description',
 	);
 
 	/**
