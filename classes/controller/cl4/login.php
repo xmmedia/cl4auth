@@ -9,10 +9,12 @@ class Controller_cl4_Login extends Controller_Base {
 		// if we are using cl4base, then we want to add the admin css
 		if (method_exists($this, 'add_admin_css')) {
 			$this->add_admin_css();
-		};
+		}
 	} // function before
 
 	/**
+	* Displays the login form and logs the user in or detects and invalid login (through Auth and Model_User)
+	*
 	* View: Login form.
 	*/
 	public function action_index() {
@@ -195,7 +197,7 @@ class Controller_cl4_Login extends Controller_Base {
 	} // function login_success_redirect
 
 	/**
-	* Log the user out and redirects to the login page.
+	* Log the user out and redirect to the login page.
 	*/
 	public function action_logout() {
 		try {
@@ -223,8 +225,6 @@ class Controller_cl4_Login extends Controller_Base {
 	* If the user has fully timed out, they will be logged out and returned to the login page
 	*/
 	public function action_timedout() {
-		$redirect = cl4::get_param('redirect', '');
-
 		$user = Auth::instance()->get_user();
 
 		$max_lifetime = Kohana::config('auth.timed_out_max_lifetime');
@@ -234,16 +234,57 @@ class Controller_cl4_Login extends Controller_Base {
 			Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'logout')) . $this->get_redirect_query());
 		}
 
-		$this->template->page_title = 'Timed Out';
+		if (Kohana::config('cl4login.enable_timeout_post') && ! empty($this->session[Kohana::config('cl4login.timeout_post_session_key')])) {
+			$redirect = Route::get('login')->uri(array('action' => 'timeoutpost'));
+		} else {
+			$redirect = cl4::get_param('redirect');
+		}
 
-		$timedout_view = View::factory('cl4/cl4login/timed_out')
+		$this->template->page_title = 'Timed Out';
+		$this->template->body_html = View::factory('cl4/cl4login/timed_out')
 			->set('redirect', $redirect)
 			->set('username', $user->username);
 
-		$this->template->body_html = $timedout_view;
-
 		$this->add_on_load_js('$(\'#password\').focus();');
 	} // function action_timedout
+
+	/**
+	* Creates a form with all the fields from the GET and POST and then submits the form
+	* to the page they were originally submitted to.
+	*
+	* @return  void
+	*
+	* @uses  Form::array_to_fields()
+	*/
+	public function action_timeoutpost() {
+		// we want to redirect the user to the previous form, first creating the form and then submitting it with JS
+		$session_key = Kohana::config('cl4login.timeout_post_session_key');
+
+		if ( ! Kohana::config('cl4login.enable_timeout_post') || empty($this->session[$session_key])) {
+			$this->login_success_redirect();
+		}
+
+		try {
+			$timeout_post = $this->session[$session_key];
+
+			$form_html = Form::open(URL::site($timeout_post['post_to']), array('id' => 'timeout_post')) . EOL;
+			if ( ! empty($timeout_post['get'])) {
+				$form_html .= Form::array_to_fields($timeout_post['get']);
+			}
+			if ( ! empty($timeout_post['post'])) {
+				$form_html .= Form::array_to_fields($timeout_post['post']);
+			}
+			$form_html .= Form::close();
+
+			$this->template->body_html = $form_html;
+			$this->add_on_load_js('$(\'#timeout_post\').submit();');
+
+			unset($this->session[$session_key]);
+		} catch (Exception $e) {
+			cl4::exception_handler($e);
+			if ( ! cl4::is_dev()) $this->login_success_redirect();
+		}
+	} // function action_timeoutpost
 
 	/**
 	* View: Access not allowed.

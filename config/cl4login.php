@@ -6,6 +6,11 @@ return array(
 
 	'session_key' => 'cl4_login', // the key in the session where the information such as the number of login attempts and forced captcha are stored
 
+	// enables the functionality to store and re-post the get and post variables when a user times out
+	'enable_timeout_post' => FALSE,
+	// the key where the timeout post, get and path values are stored on timeout
+	'timeout_post_session_key' => 'timeout_post',
+
 	// auth types for logging purposes
 	// used in auth_type_id in auth_log
 	'auth_type' => array(
