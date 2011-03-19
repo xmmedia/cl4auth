@@ -405,6 +405,7 @@ class Controller_cl4_Login extends Controller_Base {
 					$password = cl4_Auth::generate_password();
 					$user->password = $password;
 					$user->failed_login_count = 0; // reset the failed login count
+					$user->force_update_password_flag = 1; // send the user to the password update page
 					$user->save();
 				} catch (Exception $e) {
 					Message::add(__(Kohana::message('login', 'password_email_error')), Message::$error);
