@@ -5,10 +5,19 @@ class Controller_cl4_Account extends Controller_Base {
 
 	/**
 	* Must be logged in to access any of this controller
-	* No specific permissions to any of the actions because anyone logged can access them
-	* @see Controller_Base
+	* @var  boolean
+	* @see  Controller_Base
 	*/
 	public $auth_required = TRUE;
+	/**
+	* The profile and password actions require the account/profile permission
+	* @var  array
+	* @see  Controller_Base
+	*/
+	public $secure_actions = array(
+		'profile' => 'account/profile',
+		'password' => 'account/profile',
+	);
 
 	public function before() {
 		parent::before();
