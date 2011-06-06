@@ -404,7 +404,7 @@ class Model_cl4_User extends Model_Auth_User {
 		$username_available_query = DB::select(array('COUNT("*")', 'total_count'))
 			->from($this->_table_name)
 			->where('username', 'LIKE', $validation[$field])
-			->where_expiry();
+			->where_expiry(NULL, $this->_expires_column['column']);
 
 		if ($this->_loaded) {
 			$username_available_query->where($this->_primary_key, '!=', $this->pk());
