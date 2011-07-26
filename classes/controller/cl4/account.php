@@ -125,7 +125,7 @@ class Controller_cl4_Account extends Controller_Base {
 			$errors = $validation->errors();
 
 			if (empty($errors)) {
-				if (Kohana::config('auth.enable_3.0.x_hashing')) {
+				if (Kohana::$config->load('auth.enable_3.0.x_hashing')) {
 					if (Auth::instance()->hash_password((string) $validation['current_password'], Auth::instance()->find_salt($user->password)) !== $user->password) {
 						$validation->error('current_password', 'not_the_same');
 					}

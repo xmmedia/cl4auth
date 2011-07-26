@@ -39,7 +39,7 @@ class Controller_cl4_Login extends Controller_Base {
 		}
 
 		try {
-			$login_config = Kohana::config('cl4login');
+			$login_config = Kohana::$config->load('cl4login');
 
 			// Get number of login attempts this session
 			$attempts = Arr::path($this->session, $login_config['session_key'] . '.attempts', 0);
@@ -91,7 +91,7 @@ class Controller_cl4_Login extends Controller_Base {
 							$user->increment_failed_login();
 						}
 
-						$user->add_auth_log(Kohana::config('cl4login.auth_type.too_many_attempts'), $username);
+						$user->add_auth_log(Kohana::$config->load('cl4login.auth_type.too_many_attempts'), $username);
 						Message::message('user', 'recaptcha_not_valid');
 					} catch (ORM_Validation_Exception $e) {
 						throw $e;
@@ -191,7 +191,7 @@ class Controller_cl4_Login extends Controller_Base {
 		if ($redirect !== NULL) {
 			Request::current()->redirect($redirect);
 		} else {
-			$auth_config = Kohana::config('auth');
+			$auth_config = Kohana::$config->load('auth');
 			Request::current()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
 		}
 	} // function login_success_redirect
@@ -213,7 +213,7 @@ class Controller_cl4_Login extends Controller_Base {
 
 			if ( ! cl4::is_dev()) {
 				// redirect them to the default page
-				$auth_config = Kohana::config('auth');
+				$auth_config = Kohana::$config->load('auth');
 				Request::current()->redirect(Route::get($auth_config['default_login_redirect'])->uri($auth_config['default_login_redirect_params']));
 			}
 		} // try
@@ -227,14 +227,14 @@ class Controller_cl4_Login extends Controller_Base {
 	public function action_timedout() {
 		$user = Auth::instance()->get_user();
 
-		$max_lifetime = Kohana::config('auth.timed_out_max_lifetime');
+		$max_lifetime = Kohana::$config->load('auth.timed_out_max_lifetime');
 
 		if ( ! $user || ($max_lifetime > 0 && Auth::instance()->timed_out($max_lifetime))) {
 			// user is not logged in at all or they have reached the maximum amount of time we allow sometime to stay logged in, so redirect them to the login page
 			Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'logout')) . $this->get_redirect_query());
 		}
 
-		if (Kohana::config('cl4login.enable_timeout_post') && ! empty($this->session[Kohana::config('cl4login.timeout_post_session_key')])) {
+		if (Kohana::$config->load('cl4login.enable_timeout_post') && ! empty($this->session[Kohana::$config->load('cl4login.timeout_post_session_key')])) {
 			$redirect = Route::get('login')->uri(array('action' => 'timeoutpost'));
 		} else {
 			$redirect = cl4::get_param('redirect');
@@ -258,9 +258,9 @@ class Controller_cl4_Login extends Controller_Base {
 	*/
 	public function action_timeoutpost() {
 		// we want to redirect the user to the previous form, first creating the form and then submitting it with JS
-		$session_key = Kohana::config('cl4login.timeout_post_session_key');
+		$session_key = Kohana::$config->load('cl4login.timeout_post_session_key');
 
-		if ( ! Kohana::config('cl4login.enable_timeout_post') || empty($this->session[$session_key])) {
+		if ( ! Kohana::$config->load('cl4login.enable_timeout_post') || empty($this->session[$session_key])) {
 			$this->login_success_redirect();
 		}
 
@@ -319,7 +319,7 @@ class Controller_cl4_Login extends Controller_Base {
 	public function action_forgot() {
 		Kohana::load(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
 
-		$default_options = Kohana::config('cl4login');
+		$default_options = Kohana::$config->load('cl4login');
 
 		// set the template page_title (see Controller_Base for implementation)
 		$this->template->page_title = 'Forgot Password';
@@ -385,7 +385,7 @@ class Controller_cl4_Login extends Controller_Base {
 	* @todo consider changing this to not send the password, but instead allow them enter a new password right there; this might be more secure, but since we've sent them a link anyway, it's probably too late for security; the only thing is email is insecure (not HTTPS)
 	*/
 	function action_reset() {
-		$default_options = Kohana::config('cl4login');
+		$default_options = Kohana::$config->load('cl4login');
 
 		// set the template title (see Controller_Base for implementation)
 		$this->template->page_title = 'Password Reset';

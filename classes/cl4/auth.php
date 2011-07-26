@@ -18,7 +18,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	public function __construct($config = array()) {
 		if ($config['enable_3.0.x_hashing']) {
 			// Clean up the salt pattern and split it into an array
-			$config['salt_pattern'] = preg_split('/,\s*/', Kohana::config('auth')->get('salt_pattern'));
+			$config['salt_pattern'] = preg_split('/,\s*/', Kohana::$config->load('auth')->get('salt_pattern'));
 		}
 
 		parent::__construct($config);
@@ -66,7 +66,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 		$this->_session->delete($this->_config['timestamp_key']);
 
 		if ($this->get_user()) {
-			$this->get_user()->add_auth_log(Kohana::config('cl4login.auth_type.logged_out'));
+			$this->get_user()->add_auth_log(Kohana::$config->load('cl4login.auth_type.logged_out'));
 		}
 
 		return parent::logout($destroy, $logout_all);
@@ -272,7 +272,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 		if (empty($password)) {
 			$user = ORM::factory('user');
 
-			$user->add_auth_log(Kohana::config('cl4login.auth_type.invalid_password'), $username);
+			$user->add_auth_log(Kohana::$config->load('cl4login.auth_type.invalid_password'), $username);
 
 			$labels = $user->labels();
 			return array(
@@ -307,7 +307,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	*/
 	protected function _login($user, $password, $remember, $verified_human = FALSE) {
 		$messages = array();
-		$login_config = Kohana::config('cl4login');
+		$login_config = Kohana::$config->load('cl4login');
 		$auth_types = $login_config['auth_type'];
 
 		if ( ! is_object($user)) {
@@ -393,7 +393,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	* @return  boolean
 	*/
 	public function too_many_login_attempts($failed_login_count) {
-		$login_config = Kohana::config('cl4login');
+		$login_config = Kohana::$config->load('cl4login');
 		return ($failed_login_count !== NULL && $failed_login_count > $login_config['max_failed_login_count']);
 	}
 
@@ -423,7 +423,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 		$this->update_timestamp();
 
 		// delete the session key that contains # of attempts and forced captcha flag
-		Session::instance()->delete(Kohana::config('cl4login.session_key'));
+		Session::instance()->delete(Kohana::$config->load('cl4login.session_key'));
 
 		return parent::complete_login($user);
 	} // function complete_login
