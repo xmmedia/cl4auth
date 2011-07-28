@@ -140,6 +140,13 @@ class Model_cl4_User extends Model_Auth_User {
 		),
 	);
 
+	/**
+	 * Auto-serialize and unserialize columns on get/set
+	 * The settings field needs to be serialized
+	 * @var array
+	 */
+	protected $_serialize_columns = array('settings');
+
 	// relationships
 	protected $_has_many = array(
 		'user_token' => array(
@@ -413,7 +420,7 @@ class Model_cl4_User extends Model_Auth_User {
 	public function setting() {
 		// settings have not been unserialized yet
 		if ($this->_settings === NULL) {
-			$this->_settings = unserialize($this->settings);
+			$this->_settings = (array) $this->settings;
 			if (empty($this->_settings)) {
 				$this->_settings = array();
 			}
@@ -425,7 +432,7 @@ class Model_cl4_User extends Model_Auth_User {
 			// set the new value or create the setting if it does not exist
 			Arr::set_path($this->_settings, $setting, $value, '.');
 			if ( ! empty($this->_settings)) {
-				$this->settings = serialize($this->_settings);
+				$this->settings = $this->_settings;
 				$this->_log_next_query = FALSE;
 				$this->save();
 			} // if
