@@ -215,7 +215,7 @@ class Model_cl4_User extends Model_Auth_User {
 				array('min_length', array(':value', 6)),
 				array('max_length', array(':value', 200)),
 				array('email'),
-				array(array($this, 'username_available'), array(':validation', ':field')),
+				array(array($this, 'unique'), array('username', ':value')),
 			),
 			'first_name' => array(
 				array('not_empty'),
@@ -391,32 +391,6 @@ class Model_cl4_User extends Model_Auth_User {
 
 		return ($rows > 0);
 	} // function permission
-
-	/**
-	 * Checks to see if the username already exists and is not expired, triggering error if username exists.
-	 * Validation callback.
-	 *
-	 * @param   Validation  Validation object
-	 * @param   string      Field name
-	 * @return  void
-	 */
-	public function username_available(Validation $validation, $field) {
-		$username_available_query = DB::select(array('COUNT("*")', 'total_count'))
-			->from($this->_table_name)
-			->where('username', 'LIKE', $validation[$field])
-			->where_expiry(NULL, $this->_expires_column['column']);
-
-		if ($this->_loaded) {
-			$username_available_query->where($this->_primary_key, '!=', $this->pk());
-		}
-
-		$username_unavailable = (bool) $username_available_query->execute($this->_db)
-			->get('total_count');
-
-		if ($username_unavailable) {
-			$validation->error($field, 'username_available', array($validation[$field]));
-		}
-	} // function username_available
 
 	/**
 	* Sets or retrieves a setting.  If the setting does not exist, it is created.

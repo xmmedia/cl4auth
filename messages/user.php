@@ -12,7 +12,7 @@ return array(
 		'email' => ':field must be an email address.',
 		'min_length' => ':field must be an email address.',
 		'max_length' => ':field must be an email address.',
-		'username_available' => 'The username/email address entered is already used. Please use a different email address.',
+		'unique' => 'The username/email address entered is already used. Please use a different email address.',
 		'too_many_attempts' => 'There have been too many attempts on this account. Please enter the captcha before continuing.',
 		'logged_out' => 'You have been logged out successfully.',
 		'not_logged_out' => 'There was a problem logging out.',
