@@ -34,7 +34,7 @@ class Controller_cl4_Login extends Controller_Base {
 				$this->login_success_redirect($redirect);
 			}
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			if ( ! cl4::is_dev()) $this->login_success_redirect();
 		}
 
@@ -56,7 +56,7 @@ class Controller_cl4_Login extends Controller_Base {
 			// loading it here will save server time finding (searching) and loading recaptcha
 			Kohana::load(Kohana::find_file('vendor/recaptcha', 'recaptchalib'));
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			$this->action_404();
 		}
 
@@ -75,7 +75,7 @@ class Controller_cl4_Login extends Controller_Base {
 						Message::add('ReCAPTCHA valid: ' . ($human_verified ? 'Yes' : 'No'), Message::$debug);
 					} // if
 				} catch (Exception $e) {
-					cl4::exception_handler($e);
+					Kohana_Exception::caught_handler($e);
 				}
 
 				// if the captcha is required but we have not verified the human
@@ -96,7 +96,7 @@ class Controller_cl4_Login extends Controller_Base {
 					} catch (ORM_Validation_Exception $e) {
 						throw $e;
 					} catch (Exception $e) {
-						cl4::exception_handler($e);
+						Kohana_Exception::caught_handler($e);
 						Message::message('login', 'error');
 					}
 
@@ -133,7 +133,7 @@ class Controller_cl4_Login extends Controller_Base {
 					} catch (ORM_Validation_Exception $e) {
 						throw $e;
 					} catch (Exception $e) {
-						cl4::exception_handler($e);
+						Kohana_Exception::caught_handler($e);
 						Message::message('login', 'error');
 					}
 
@@ -161,10 +161,10 @@ class Controller_cl4_Login extends Controller_Base {
 				} // if
 			} // if $_POST
 		} catch (ORM_Validation_Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::message('user', 'username.invalid');
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 		}
 
 		if ( ! empty($timed_out)) {
@@ -208,7 +208,7 @@ class Controller_cl4_Login extends Controller_Base {
 			// redirect to the user account and then the signin page if logout worked as expected
 			Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri() . $this->get_redirect_query());
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			Message::add(__(Kohana::message('user', 'username.not_logged_out')), Message::$error);
 
 			if ( ! cl4::is_dev()) {
@@ -281,7 +281,7 @@ class Controller_cl4_Login extends Controller_Base {
 
 			unset($this->session[$session_key]);
 		} catch (Exception $e) {
-			cl4::exception_handler($e);
+			Kohana_Exception::caught_handler($e);
 			if ( ! cl4::is_dev()) $this->login_success_redirect();
 		}
 	} // function action_timeoutpost

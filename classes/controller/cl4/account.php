@@ -77,7 +77,7 @@ class Controller_cl4_Account extends Controller_Base {
 				), Message::$error);
 
 			} catch (Exception $e) {
-				cl4::exception_handler($e);
+				Kohana_Exception::caught_handler($e);
 				Message::add(__(Kohana::message('account', 'profile_save_error')), Message::$error);
 			}
 		} // if
@@ -159,7 +159,7 @@ class Controller_cl4_Account extends Controller_Base {
 					Request::current()->redirect(Route::get(Route::name(Request::current()->route()))->uri(array('action' => 'profile')));
 
 				} catch (Exeception $e) {
-					cl4::exception_handler($e);
+					Kohana_Exception::caught_handler($e);
 					Message::add(__(Kohana::message('account', 'password_change_error')), Message::$error);
 				}
 
