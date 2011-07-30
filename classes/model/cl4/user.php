@@ -420,7 +420,9 @@ class Model_cl4_User extends Model_Auth_User {
 	public function setting() {
 		// settings have not been unserialized yet
 		if ($this->_settings === NULL) {
-			$this->_settings = (array) $this->settings;
+			// retrieving the settings will automatically unserialize them (using json_decode)
+			// we then want to convert the resulting stdClass to an array
+			$this->_settings = Arr::stdclass_to_array($this->settings);
 			if (empty($this->_settings)) {
 				$this->_settings = array();
 			}
