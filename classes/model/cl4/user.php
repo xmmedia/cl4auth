@@ -89,6 +89,10 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'size' => 6,
+				'maxlength' => 6,
+			),
 		),
 		'last_login' => array(
 			'field_type'     => 'datetime',
@@ -105,6 +109,10 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => TRUE,
 			'view_flag'      => TRUE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'size' => 9,
+				'maxlength' => 9,
+			),
 		),
 		'last_failed_login' => array(
 			'field_type'     => 'datetime',
@@ -121,6 +129,10 @@ class Model_cl4_User extends Model_Auth_User {
 			'search_flag'    => FALSE,
 			'view_flag'      => FALSE,
 			'is_nullable'    => FALSE,
+			'field_attributes' => array(
+				'size' => 32,
+				'maxlength' => 32,
+			),
 		),
 		'force_update_password_flag' => array(
 			'field_type'     => 'checkbox',
