@@ -46,6 +46,10 @@ class Model_cl4_Group extends ORM {
 			'search_flag' => TRUE,
 			'view_flag' => TRUE,
 			'is_nullable' => FALSE,
+			'field_attributes' => array(
+				'size' => 75,
+				'maxlength' => 100,
+			),
 		),
 		'description' => array(
 			'field_type' => 'textarea',
