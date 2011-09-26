@@ -239,11 +239,9 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	*/
 	public function timed_out($auth_lifetime = NULL) {
 		if ($auth_lifetime === null) $auth_lifetime = $this->_config['auth_lifetime'];
-
 		$current_timestamp = Session::instance()->get($this->_config['timestamp_key'], 0);
-
-		// there is a timestamp in the session and the current timestamp plus the lifetime is in the future or now
-		if ($auth_lifetime == 0 || ($current_timestamp > 0 && ($current_timestamp + $auth_lifetime) >= time())) {
+		// there is no auth lifetime or no timestamp in the session or the current timestamp plus the lifetime is in the future or now
+		if ($current_timestamp == 0 || $auth_lifetime == 0 || ($current_timestamp > 0 && ($current_timestamp + $auth_lifetime) >= time())) {
 			// session has not timed out
 			return FALSE;
 		} else {
