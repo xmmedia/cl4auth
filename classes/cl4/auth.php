@@ -84,7 +84,7 @@ class cl4_Auth extends Kohana_Auth_ORM {
 	public function allowed($permission, $action_name = NULL, $all_required = TRUE) {
 		$status = FALSE;
 
-		if (is_object($permission) && is_subclass_of($permission, 'Controller_Base') && $action_name !== NULL) {
+		if (is_object($permission) && $permission instanceof Controller_Base && $action_name !== NULL) {
 			return $this->controller_allowed($permission, $action_name);
 
 		} else {
