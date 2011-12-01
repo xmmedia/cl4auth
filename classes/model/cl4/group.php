@@ -105,7 +105,8 @@ class Model_cl4_Group extends ORM {
 	 */
 	public function filters() {
 		return array(
-			TRUE => array(array('trim')),
+			'name' => array(array('trim')),
+			'description' => array(array('trim')),
 		);
 	}
 } // class
