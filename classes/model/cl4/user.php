@@ -425,23 +425,23 @@ class Model_cl4_User extends Model_Auth_User {
 	* @param   string  $setting  Dot separated path to the setting
 	* @param   mixed   $value    The value to set (not required when getting a setting)
 	*
-	* @chainable
 	* @return  ORM    When setting a value, the function returns the object or FALSE if we catch an error.
 	* @return  mixed  When retrieving a setting, the setting value is returned or if not set it tries to return the default specified in the model _default_settings.
 	*/
 	public function setting() {
-		// settings have not been unserialized yet
+		// set the _settings property, if it hasn't been set yet
 		if ($this->_settings === NULL) {
 			// retrieving the settings will automatically unserialize them (using json_decode)
-			// we then want to convert the resulting stdClass to an array
 			$this->_settings = $this->settings;
 			if (empty($this->_settings)) {
 				$this->_settings = array();
 			}
 		} // if
 
+		$num_function_args = func_num_args();
+
 		// the 'set' case
-		if (func_num_args() == 2) {
+		if ($num_function_args == 2) {
 			list($setting, $value) = func_get_args();
 			// set the new value or create the setting if it does not exist
 			Arr::set_path($this->_settings, $setting, $value, '.');
@@ -451,8 +451,9 @@ class Model_cl4_User extends Model_Auth_User {
 				$this->save();
 			} // if
 			return $this;
-		} else {
-			// the 'get' case
+
+		// the 'get' case
+		} else if ($num_function_args == 1) {
 			list($setting) = func_get_args();
 
 			// @todo figure out how this works with values that are null when found, specifically when it's not an array that's found
@@ -471,6 +472,8 @@ class Model_cl4_User extends Model_Auth_User {
 			} else {
 				return $default_settings;
 			}
+		} else {
+			throw new Kohana_Exception('More than 2 or 0 function arguments were received for setting or getting a user setting');
 		} // if
 	} // function setting
 
