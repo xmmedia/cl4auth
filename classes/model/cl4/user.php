@@ -306,7 +306,8 @@ class Model_cl4_User extends Model_Auth_User {
 		$this->failed_login_count = DB::expr('failed_login_count + 1');
 		$this->last_failed_login = DB::expr('NOW()');
 		// save and then retrieve the record so the object is updated with the failed count and date
-		$this->save()
+		$this->is_valid()
+			->save()
 			->reload();
 
 		return $this;
