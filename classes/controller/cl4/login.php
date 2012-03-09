@@ -237,7 +237,8 @@ class Controller_cl4_Login extends Controller_Base {
 		if (Kohana::$config->load('cl4login.enable_timeout_post') && ! empty($this->session[Kohana::$config->load('cl4login.timeout_post_session_key')])) {
 			$redirect = Route::get('login')->uri(array('action' => 'timeoutpost'));
 		} else {
-			$redirect = cl4::get_param('redirect');
+			// need to decode the redirect as it will be encoded in the URL
+			$redirect = urldecode(cl4::get_param('redirect'));
 		}
 
 		$this->template->page_title = 'Timed Out';
