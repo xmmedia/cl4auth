@@ -294,7 +294,7 @@ class Controller_cl4_Login extends Controller_Base {
 		// set the template title (see Controller_App for implementation)
 		$this->template->title = 'Access not allowed';
 		$view = $this->template->body_html = View::factory('cl4/cl4login/no_access')
-			->set('referrer', cl4::get_param('referrer'));
+			->set('referrer', urldecode(cl4::get_param('referrer')));
 	} // function action_noaccess
 
 	/**
