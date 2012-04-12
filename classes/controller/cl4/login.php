@@ -340,8 +340,9 @@ class Controller_cl4_Login extends Controller_Base {
 				// Admin passwords cannot be reset by email
 				if ($captcha_received && $resp->is_valid && $user->loaded() && ! in_array($user->username, $default_options['admin_accounts'])) {
 					// send an email with the account reset token
-					$user->reset_token = Text::random('alnum', 32);
-					$user->save();
+					$user->set('reset_token', Text::random('alnum', 32))
+						->is_valid()
+						->save();
 
 					try {
 						$mail = new Mail();
@@ -410,10 +411,15 @@ class Controller_cl4_Login extends Controller_Base {
 				if (is_numeric($user->id) && ! in_array($user->username, $default_options['admin_accounts'])) {
 					try {
 						$password = cl4_Auth::generate_password();
-						$user->password = $password;
-						$user->failed_login_count = 0; // reset the failed login count
-						$user->force_update_password_flag = 1; // send the user to the password update page
-						$user->save();
+						$user->values(array(
+								'password' => $password,
+								// reset the failed login count
+								'failed_login_count' => 0,
+								// send the user to the password update page
+								'force_update_password_flag' => 1,
+							))
+							->is_valid()
+							->save();
 					} catch (Exception $e) {
 						Message::add(__(Kohana::message('login', 'password_email_error')), Message::$error);
 						throw $e;
