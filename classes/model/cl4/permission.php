@@ -12,6 +12,7 @@ class Model_cl4_Permission extends ORM {
 
 	protected $_sorting = array(
 		'name' => 'ASC',
+		'permission' => 'ASC',
 	);
 
 	// column definitions

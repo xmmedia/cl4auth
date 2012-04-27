@@ -1,7 +1,7 @@
 <div class="login_box">
 	<h1>Login</h1>
 	<p>Login with your email address and password.</p>
-	<!--<p>If you do not already have an account, <?php echo HTML::anchor('login/register', 'create one') ?> first.</p>-->
+	<?php /*<p>If you do not already have an account, <?php echo HTML::anchor('login/register', 'create one') ?> first.</p>*/ ?>
 
 	<?php echo Form::open(Route::get('login')->uri()); ?>
 	<?php echo Form::hidden('redirect', $redirect); ?>
