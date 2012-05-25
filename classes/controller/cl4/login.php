@@ -22,11 +22,9 @@ class Controller_cl4_Login extends Controller_Base {
 			// set the template title (see Controller_App for implementation)
 			$this->template->page_title = 'Login';
 
-			// get default username if set somewhere
-			$default_username = Cookie::get('username', NULL);
-
 			// get some variables from the request
-			$username = cl4::get_param('username', $default_username);
+			// get the user name from a get parameter or a cookie (if set)
+			$username = cl4::get_param('username', Cookie::get('username'));
 			$password = cl4::get_param('password');
 			$timed_out = cl4::get_param('timed_out');
 			$redirect = urldecode(cl4::get_param('redirect')); // default to NULL when no redirect is received so it uses the default redirect
