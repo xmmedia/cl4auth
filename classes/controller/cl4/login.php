@@ -29,7 +29,7 @@ class Controller_cl4_Login extends Controller_Base {
 			$username = cl4::get_param('username', $default_username);
 			$password = cl4::get_param('password');
 			$timed_out = cl4::get_param('timed_out');
-			$redirect = cl4::get_param('redirect'); // default to NULL when no redirect is received so it uses the default redirect
+			$redirect = urldecode(cl4::get_param('redirect')); // default to NULL when no redirect is received so it uses the default redirect
 
 			// If user already signed-in
 			if (Auth::instance()->logged_in() === TRUE){
@@ -308,7 +308,7 @@ class Controller_cl4_Login extends Controller_Base {
 	* @return	string
 	*/
 	protected function get_redirect_query() {
-		$redirect = cl4::get_param('redirect');
+		$redirect = urldecode(cl4::get_param('redirect'));
 
 		if ( ! empty($redirect)) {
 			return URL::array_to_query(array('redirect' => $redirect), '&');
