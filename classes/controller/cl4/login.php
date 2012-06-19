@@ -336,6 +336,7 @@ class Controller_cl4_Login extends Controller_Base {
 				}
 
 				$user = ORM::factory('user')->where('username', '=', $_POST['reset_username'])
+					->where_active('user')
 					->find();
 
 				// Admin passwords cannot be reset by email
@@ -406,7 +407,11 @@ class Controller_cl4_Login extends Controller_Base {
 			// make sure that the reset_token has exactly 32 characters (not doing that would allow resets with token length 0)
 			// also make sure we aren't trying to reset the password for an admin
 			if ( ! empty($username) && ! empty($reset_token) && strlen($reset_token) == 32) {
-				$user = ORM::factory('user')->where('username', '=', $_REQUEST['username'])->and_where('reset_token', '=', $_REQUEST['reset_token'])->find();
+				$user = ORM::factory('user')
+					->where('username', '=', $_REQUEST['username'])
+					->and_where('reset_token', '=', $_REQUEST['reset_token'])
+					->where_active('user')
+					->find();
 
 				// admin passwords cannot be reset by email
 				if (is_numeric($user->id) && ! in_array($user->username, $default_options['admin_accounts'])) {
