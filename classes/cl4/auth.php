@@ -308,13 +308,18 @@ class cl4_Auth extends Kohana_Auth_ORM {
 		$login_config = Kohana::$config->load('cl4login');
 		$auth_types = $login_config['auth_type'];
 
+		// user is not an object, so it must be the username
 		if ( ! is_object($user)) {
-			// user is not an object, so it must be the username
 			$username = $user;
 
 			// Load the user
 			$user = ORM::factory('user');
 			$user->add_login_where($username)->find();
+
+		// $user passed as an object, so we want to grab the username from the object
+		// note: Kohana doesn't do this because they don't actually need the username var anywhere, they just store it just incase
+		} else {
+			$username = $user->username;
 		}
 
 		$user_labels = $user->labels();
