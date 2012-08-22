@@ -29,9 +29,6 @@ class Controller_cl4_Login extends Controller_Base {
 			$timed_out = cl4::get_param('timed_out');
 			// default to NULL when no redirect is received so it uses the default redirect
 			$redirect = cl4::get_param('redirect');
-			if ($redirect !== NULL) {
-				$redirect = urldecode($redirect);
-			}
 
 			// If user already signed-in
 			if (Auth::instance()->logged_in() === TRUE){
@@ -243,7 +240,7 @@ class Controller_cl4_Login extends Controller_Base {
 			$redirect = Route::get('login')->uri(array('action' => 'timeoutpost'));
 		} else {
 			// need to decode the redirect as it will be encoded in the URL
-			$redirect = urldecode(cl4::get_param('redirect'));
+			$redirect = cl4::get_param('redirect');
 		}
 
 		$this->template->page_title = 'Timed Out';
@@ -299,7 +296,7 @@ class Controller_cl4_Login extends Controller_Base {
 		// set the template title (see Controller_App for implementation)
 		$this->template->title = 'Access not allowed';
 		$view = $this->template->body_html = View::factory('cl4/cl4login/no_access')
-			->set('referrer', urldecode(cl4::get_param('referrer')));
+			->set('referrer', cl4::get_param('referrer'));
 	} // function action_noaccess
 
 	/**
