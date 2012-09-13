@@ -56,13 +56,13 @@ class Model_cl4_User_Admin extends Model_User {
 			$labels = $this->labels();
 			$rules = parent::rules(); // get the parent rules, because the rules are modified within this Model
 			// add the validation labels and rules
-		    $validation->label('password', $labels['password'])
-		        ->label('password_confirm', $labels['password_confirm'])
-		        ->rules('password', $rules['password'])
-		        ->rule('password_confirm', 'matches', array(':validation', 'password', 'password_confirm'));
+			$validation->label('password', $labels['password'])
+				->label('password_confirm', $labels['password_confirm'])
+				->rules('password', $rules['password'])
+				->rule('password_confirm', 'matches', array(':validation', 'password', 'password_confirm'));
 
-		    // since the password was received, hash it (the data in validation will be kept separate)
-		    $this->password = $this->hash_password($this->password);
+			// since the password was received, hash it (the data in validation will be kept separate)
+			$this->password = $this->hash_password($this->password);
 
 		} else if (array_key_exists('password', $this->_changed)) {
 			 unset($this->_changed['password']);
