@@ -70,4 +70,30 @@ class Model_cl4_User_Admin extends Model_User {
 
 		return parent::save($validation);
 	} // function save
+
+	/**
+	 * Same as parent _build_select, but, if set, the password_confirm column is not added to the select statement
+	 * (as it's not actually in the db).
+	 * This is a hack that we'll need to determine a better way.
+	 *
+	 * @return  array  Columns to select
+	 */
+	protected function _build_select() {
+		$columns = array();
+
+		if (isset($this->_table_columns['password_confirm'])) {
+			$password_confirm_column = $this->_table_columns['password_confirm'];
+			unset($this->_table_columns['password_confirm']);
+		}
+
+		foreach ($this->_table_columns as $column => $_) {
+			$columns[] = array($this->_object_name . '.' . $column, $column);
+		}
+
+		if (isset($password_confirm_column)) {
+			$this->_table_columns['password_confirm'] = $password_confirm_column;
+		}
+
+		return $columns;
+	}
 } // class
